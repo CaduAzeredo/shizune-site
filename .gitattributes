@@ -1,0 +1,9 @@
+* text=auto eol=lf
+
+*.png binary
+*.ico binary
+
+# A captura do validador é a prova da página. Ela entra e sai do repositório
+# byte a byte: nada de conversão de fim de linha, nada de "normalização".
+# Vem por último de propósito — no .gitattributes, a última regra que casa vence.
+src/content/saida-teste-negativo.txt -text

@@ -1,0 +1,9 @@
+node_modules
+dist
+.vercel
+.DS_Store
+*.local
+
+# Saídas de ferramenta que não são fonte
+.eslintcache
+tsconfig.*.tsbuildinfo

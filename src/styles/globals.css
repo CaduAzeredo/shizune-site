@@ -1,0 +1,332 @@
+@import "tailwindcss";
+@import "./tokens.css";
+@import "./motion.css";
+
+/* ============================================================================
+   Os tokens viram utilitários.
+
+   `inline` porque os valores já são `var()` de `tokens.css`: sem ele o Tailwind
+   copiaria o valor resolvido e a folha de tokens deixaria de ser a fonte.
+   ========================================================================= */
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-border: var(--border);
+  --color-border-topo: var(--border-topo);
+  --color-border-topo-term: var(--border-topo-term);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-muted: var(--primary-muted);
+  --color-accent-amber: var(--accent-amber);
+  --color-accent-amber-deep: var(--accent-amber-deep);
+  --color-status-alert: var(--status-alert);
+
+  --font-sans: var(--font-family-sans);
+  --font-mono: var(--font-family-mono);
+}
+
+/* ============================================================================
+   Base
+   ========================================================================= */
+@layer base {
+  html {
+    /* Sem rolagem suave: o leitor lê código antes de texto, e rolagem
+       sequestrada é a primeira coisa que este público reprova. */
+    scroll-behavior: auto;
+    background-color: var(--background);
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-family-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Foco visível em TUDO que é focável, e não só em link. O anel é verde
+     porque foco é estado, e estado é o papel do verde nesta paleta. */
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 120ms ease;
+  }
+
+  a:hover {
+    color: var(--primary-hover);
+  }
+
+  /* O marcador nativo sai porque o `summary` tem indicador próprio, escrito no
+     conteúdo. A operação por teclado é a nativa e continua intacta. */
+  summary {
+    list-style: none;
+    cursor: pointer;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+}
+
+/* ============================================================================
+   Superfície — três níveis, e nada além disso: a página, o cartão, o terminal.
+
+   A elevação é a borda de cima um tom mais clara. Sem sombra, sem gradiente,
+   sem desfoque, sem vidro: o portão do `check-slop` reprova o caminho fácil, e
+   a régua aqui é Linear/Vercel/Zed, não biblioteca de componentes.
+   ========================================================================= */
+@layer components {
+  .superficie-card {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-top-color: var(--border-topo);
+    border-radius: 6px;
+  }
+
+  .superficie-cmd {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    overflow-x: auto;
+  }
+
+  /* Bloco de comando DENTRO de um cartão afunda em vez de subir: dois níveis
+     iguais encostados leem como um só. */
+  .superficie-card .superficie-cmd {
+    background-color: var(--background);
+  }
+
+  .superficie-term {
+    background-color: var(--surface-elevated);
+    border: 1px solid var(--border);
+    border-top-color: var(--border-topo-term);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  /* O token literal do registro — `vigente`, `DEC-NNN`, `%G?`. Monoespaçado
+     sempre: é texto de máquina citado dentro de texto de gente. */
+  .token-literal {
+    font-family: var(--font-family-mono);
+    font-size: 0.78em;
+    color: var(--foreground);
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 5px;
+    /* Quebra nos espaços, nunca dentro de uma palavra: `rascunho, assinatura
+       pendente` tem 28 caracteres e não cabe numa coluna de card de 216px —
+       com `nowrap` ele escapava pela borda direita. Partir a palavra
+       estragaria um literal que a pessoa vai copiar; partir no espaço, não.
+
+       A caixa fica ABERTA na quebra (`slice`, o padrão) e não fechada dos dois
+       lados (`clone`): fechada, o leitor vê DOIS literais onde há um só —
+       `rascunho,` e `assinatura pendente` pareceriam dois estados diferentes,
+       numa página cujo assunto é justamente quantos estados existem. */
+    white-space: normal;
+  }
+
+  .superficie-card .token-literal {
+    background-color: var(--background);
+  }
+
+  /* ── A coluna de leitura ───────────────────────────────────────────────
+     Uma medida só, nas duas rotas. 760px com 40px de respiro dá ~680px de
+     texto: perto de 75 caracteres em 16,5px, que é onde a linha para de
+     cansar. No celular o respiro cai para 20px e a medida é a tela. */
+  .coluna {
+    max-width: 760px;
+    margin-inline: auto;
+    padding-inline: 20px;
+  }
+
+  @media (min-width: 768px) {
+    .coluna {
+      padding-inline: 40px;
+    }
+  }
+
+  /* ── A escala de texto ─────────────────────────────────────────────────
+     Duas larguras, uma escala. Fica aqui, e não espalhada em classe utilitária
+     por elemento, porque é a página inteira que precisa mudar junto quando o
+     ritmo mudar — e porque `text-[16.5px] md:text-[16px]` repetido trinta vezes
+     é a mesma decisão tomada trinta vezes. */
+  .titulo-secao {
+    margin: 0 0 16px;
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: -0.012em;
+    color: var(--foreground);
+  }
+
+  @media (min-width: 768px) {
+    .titulo-secao {
+      margin-bottom: 20px;
+      font-size: 22px;
+    }
+  }
+
+  .texto {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--foreground);
+  }
+
+  @media (min-width: 768px) {
+    .texto {
+      font-size: 16.5px;
+      line-height: 1.62;
+    }
+  }
+
+  .texto-mudo {
+    margin: 0;
+    font-size: 14.5px;
+    line-height: 1.62;
+    color: var(--muted-foreground);
+  }
+
+  @media (min-width: 768px) {
+    .texto-mudo {
+      font-size: 15px;
+    }
+  }
+
+  /* ── A frase do hero ───────────────────────────────────────────────────
+     Estrutura de três partes: o sujeito recua para o cinza, o verbo carrega o
+     peso e a cor. Os três verbos passam a ser as três batidas, e a estrutura
+     aparece sem uma palavra a mais. O texto é o mesmo — só a quebra e a
+     escala mudam entre as duas larguras. */
+  .frase-hero {
+    margin: 0;
+    font-size: 34px;
+    line-height: 1.16;
+    font-weight: 400;
+    letter-spacing: -0.028em;
+    color: var(--muted-foreground);
+  }
+
+  .frase-hero b {
+    font-weight: 600;
+    color: var(--foreground);
+  }
+
+  @media (min-width: 768px) {
+    .frase-hero {
+      font-size: 58px;
+      line-height: 1.14;
+      letter-spacing: -0.032em;
+    }
+  }
+
+  /* ── O número medido ───────────────────────────────────────────────────
+     Monoespaçado porque é medida, âmbar porque é o produto falando, e grande
+     porque um número com comando ao lado é o argumento inteiro desta página. */
+  .numero-medido {
+    font-family: var(--font-family-mono);
+    font-size: 46px;
+    line-height: 0.92;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    color: var(--accent-amber);
+  }
+
+  @media (min-width: 768px) {
+    .numero-medido {
+      font-size: 54px;
+    }
+  }
+
+  /* ── O bloco de terminal ───────────────────────────────────────────────
+     O elemento mais importante da página e o mais fácil de errar. Texto real,
+     selecionável, copiável, inteiro no DOM. Nunca imagem, nunca GIF, nunca um
+     log reencenado.
+
+     `white-space: pre` e não `pre-wrap`: quebrar linha para caber é editar a
+     saída. No celular ele rola na horizontal — e a região rolável é focável
+     por teclado, senão a rolagem existe só para quem tem mouse. */
+  .term-saida {
+    margin: 0;
+    padding: 18px 16px;
+    overflow-x: auto;
+    font-family: var(--font-family-mono);
+    font-size: 11.5px;
+    line-height: 1.7;
+    color: var(--muted-foreground);
+    white-space: pre;
+  }
+
+  @media (min-width: 768px) {
+    .term-saida {
+      padding: 22px 24px;
+      font-size: 12.5px;
+      line-height: 1.72;
+    }
+  }
+
+  .term-ok {
+    color: var(--primary);
+  }
+
+  .term-secao {
+    color: var(--accent-amber);
+  }
+
+  .term-fim {
+    border-top: 1px solid var(--border);
+  }
+
+  .term-barra {
+    display: block;
+    width: 100%;
+    font-family: var(--font-family-mono);
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--muted-foreground);
+    text-align: left;
+    padding: 13px 16px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background-color: var(--surface);
+    transition:
+      background-color 120ms ease,
+      color 120ms ease;
+  }
+
+  .term-barra:hover {
+    background-color: var(--surface-hover);
+    color: var(--foreground);
+  }
+
+  details[open] > .term-barra {
+    color: var(--foreground);
+  }
+
+  /* O sinal é `content` de propósito: ele não é texto da saída, e não deve ser
+     copiado junto quando alguém selecionar o bloco inteiro. */
+  .term-barra .sinal::after {
+    content: "+";
+  }
+
+  details[open] > .term-barra .sinal::after {
+    content: "−";
+  }
+
+  @media (min-width: 768px) {
+    .term-barra {
+      font-size: 12.5px;
+      padding: 11px 24px;
+    }
+  }
+}

@@ -1,0 +1,34 @@
+# O portão, na integração contínua.
+#
+# Ele roda o mesmo `bun run portao` da máquina — nada de uma régua para o
+# desenvolvimento e outra para o CI. O que muda é só o navegador: aqui não há
+# Brave, então o `e2e` cai no Chrome do runner. Os dois são Chromium.
+#
+# O que o CI NÃO roda, e é de propósito:
+#
+# - `bun run ficha` — ela clona o pacote público e pergunta ao GitHub qual é a
+#   release Latest. Rodá-la aqui faria os números da página mudarem sozinhos
+#   num push, sem ninguém ver o diff. A ficha é gerada à mão e commitada; o
+#   `portao` confere que a página bate com o arquivo commitado.
+# - `bun run arte` — mesma razão: arte gerada em CI entra sem revisão visual.
+name: portão
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  portao:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: o portão inteiro
+        run: bun run portao

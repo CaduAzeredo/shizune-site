@@ -1,0 +1,103 @@
+/* ============================================================================
+   Movimento — mínimo, preso ao lugar, e uma vez só.
+
+   Três gestos, e a lista é fechada:
+
+   1. `surgir`   — a dobra entra em cascata no carregamento: símbolo, frase,
+                   subtítulo, as três linhas do problema.
+   2. `colapsar` — o símbolo do hero colapsa uma vez: a onda oscila a largura
+                   inteira e vira a reta. É o argumento da página em gesto.
+   3. `imprimir` — o bloco de terminal se desenha de cima para baixo, um tiro.
+
+   O que NÃO existe aqui, e o portão reprova: rolagem sequestrada · parallax ·
+   entrada por rolagem · cursor customizado · WebGL ou 3D · transição de página
+   cinematográfica · rolagem suave · gradiente decorativo · glassmorphism ·
+   qualquer animação em laço · qualquer coisa que reaja ao cursor.
+
+   `backwards` em toda parte. É a regra que faz a página sobreviver ao pior
+   caso: se a animação não rodar — CSS que não chegou, motor sem suporte a
+   animar `d` —, tudo aparece no ESTADO FINAL. O símbolo nasce colapsado e
+   normal, o texto nasce visível. Nunca invisível.
+   ========================================================================= */
+
+@keyframes surgir {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+}
+
+/* A onda em repouso, no hero, é escrita com a cauda em forma de curva —
+   `C17.2 12 19.8 12 22.5 12`, com os pontos de controle SOBRE a reta — e não
+   como `L22.5 12`. As duas desenham exatamente a mesma linha (conferido por
+   captura: mesmo sha256 nas duas formas em repouso), e só a forma em curva
+   permite a cauda interpolar. Fora do hero — header, rodapé, favicon, e o
+   arquivo `glifo-shizune-compacto.svg` do Brain — o traçado segue em `L`. */
+@keyframes colapsar {
+  from {
+    d: path(
+      "M1.5 12C1.5 2 3 1.5 5 1.5C7 1.5 7 21 8.5 21C10 21 10 2.5 11.5 2.5C12.7 2.5 13.4 21 14.5 21C17.2 21 19.8 3 22.5 12"
+    );
+  }
+}
+
+@keyframes imprimir {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.entra {
+  animation: surgir 560ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.d1 {
+  animation-delay: 40ms;
+}
+.d2 {
+  animation-delay: 240ms;
+}
+.d3 {
+  animation-delay: 440ms;
+}
+.d4 {
+  animation-delay: 640ms;
+}
+
+.glifo-hero path {
+  animation: colapsar 760ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.imprime {
+  animation: imprimir 820ms steps(24, end) backwards;
+}
+
+/* ============================================================================
+   A rede.
+
+   Ela atinge `*` de propósito: é o que cobre o que alguém esquecer de tratar
+   amanhã. `scripts/check-motion.mjs` reprova o build se este bloco sumir ou
+   deixar de ser universal.
+   ========================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Os três gestos morrem inteiros, e não acelerados: um colapso de símbolo em
+     0,01ms ainda é um salto de forma na tela de quem pediu para não ver
+     movimento. */
+  .entra,
+  .imprime,
+  .glifo-hero path {
+    animation: none !important;
+  }
+}

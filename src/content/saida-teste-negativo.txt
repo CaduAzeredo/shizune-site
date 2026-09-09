@@ -1,0 +1,65 @@
+
+[negativo] três classes de defeito, uma por vez
+
+  ok    reprovou commit que cita DEC inexistente (código 1)
+  ok    explicou que o DEC-999 não existe
+  ok    reprovou DEC sem assinante
+  ok    explicou que falta assinante
+  ok    reprovou DEC cuja assinatura não resolve na árvore
+  ok    explicou que o SHA não resolve
+
+[positivo] registro e citação corretos
+
+  ok    aprovou citação legítima (código 0)
+  ok    reconheceu a citação como válida
+
+[rascunho] maquina rascunha, humano assina, SHA ativa
+
+  ok    rascunho SEM referência não reprova (código 0)
+  ok    contou a decisão como rascunho
+  ok    emitiu o aviso de assinatura pendente
+  ok    rascunho REFERENCIADA por commit reprova (código 1)
+  ok    explicou que a decisão citada não está assinada
+  ok    linha sem assinante e sem estado rascunho ainda reprova
+
+[documentação] exemplo dentro de bloco cercado não é decisão
+
+  ok    exemplo cercado com SHA inventado não reprova
+  ok    contou 1 decisão, não 2 — o exemplo ficou de fora
+  ok    não mencionou o SHA do exemplo em lugar nenhum
+  ok    linha defeituosa DEPOIS da cerca fechada continua reprovando
+
+[guarda] o extrator de trailer realmente extraiu
+
+  ok    texto sem trailer não reprova
+  ok    contou zero citações num texto sem trailer
+  ok    aceitou trailer em caixa baixa e com espaços
+
+[fronteira] commit posterior sem assinatura por chave reprova (DEC-007)
+
+  ok    reprovou commit posterior à fronteira sem assinatura
+  ok    explicou a falha pelo conceito de fronteira de autoria
+  ok    disse que falta assinatura confiável
+  ok    contou 0 de 1 assinado
+  ok    o rótulo da linha-resumo acompanha o resultado, não diz ok
+  ok    imprimiu o ambiente de verificação junto da falha
+
+[guarda] o aviso de chave é aviso, não reprovação
+
+  ok    avisou sobre commit sem chave sem reprovar
+
+[exigência] a instância declara que assinar decisão exige chave — e só então reprova
+
+  ok    a mesma citação passa sem exigência e reprova com --exigir-chave
+  ok    explicou que falta chave confiável
+  ok    atribuiu a exigência à instância, não ao framework
+  ok    imprimiu o código %G? do commit reprovado
+  ok    linha vigente sem chave reprova com o arquivo declarado, sem citação e sem fronteira
+  ok    anunciou a exigência declarada pelo arquivo
+  ok    apontou a linha do registro, não uma citação
+  ok    arquivo com token desconhecido reprova
+  ok    explicou que a exigência declarada não foi reconhecida
+  ok    sem o arquivo, a mesma linha volta a passar
+  ok    não anunciou exigência que não existe
+
+test-validate-decisions: tudo passou.

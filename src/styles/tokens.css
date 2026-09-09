@@ -1,0 +1,64 @@
+/* ============================================================================
+   Tokens — shizune.dev
+   Fonte única dos valores brutos. Nenhuma cor pode ser escrita em .tsx.
+
+   A REGRA que governa esta paleta: cor é ELEMENTO, nunca ATMOSFERA. O fundo é
+   quase-preto e cobre a tela. O verde é o elemento do autor — a barra do
+   lockup, o prompt, o link, o estado "ok" do validador. O âmbar é o acento do
+   produto, em lugares contados: o símbolo, os marcadores de seção do terminal,
+   os três números. Duas propostas de atmosfera já foram reprovadas pelo
+   operador ("tem verde demais", "tem muito amarelo"); esta paleta é a terceira
+   e nasce com a regra escrita.
+
+   SEM TEMA CLARO. Não existe bloco `.light` meio-pronto aqui: o fundo escuro é
+   a identidade, e quem for implementar tema claro começa do zero, de propósito.
+
+   CONTRASTE — os números não são escritos aqui. `scripts/check-contrast.mjs`
+   descobre todo escopo que declara token, resolve os `var()` e mede cada par
+   declarado. Comentário de contraste envelhece em silêncio; medição, não.
+   ========================================================================= */
+
+:root {
+  /* ---- base ---- */
+  --background: #0a0e10;
+  --surface: #101618;
+  --surface-elevated: #161d20;
+  --border: #1e2a2b;
+  /* Hover da barra do `<details>`: AFUNDA em vez de acender. A barra fica
+     entre dois blocos de terminal, e clarear ali competiria com o texto que
+     ela esconde. */
+  --surface-hover: #0d1315;
+  /* A borda de cima de card e terminal, um tom mais clara: é toda a elevação
+     que este site tem. Sem sombra, sem gradiente, sem vidro. */
+  --border-topo: #253032;
+  --border-topo-term: #2a3639;
+  --foreground: #edf2ef;
+  --muted-foreground: #8a9a92;
+
+  /* ---- o elemento do autor ---- */
+  --primary: #3fa372;
+  /* Hover mais CLARO que o repouso, e não mais escuro. Sobre fundo quase-preto
+     o caminho do destaque é para cima; o site pessoal escurece porque nasceu
+     de uma paleta com dois modos. Aqui só há um. */
+  --primary-hover: #56bd8b;
+  --primary-muted: #2e8c67;
+
+  /* ---- o acento do produto ---- */
+  --accent-amber: #dec39c;
+  --accent-amber-deep: #cfa86e;
+
+  /* ---- estado semântico ---- */
+  /* Só a linha que reprova e o 404. Nenhuma das duas rotas tem linha que
+     reprova, então na prática hoje ele só aparece no 404 — e continua
+     declarado para que a primeira linha vermelha não invente uma cor. */
+  --status-alert: #e8776e;
+
+  /* ---- tipografia ---- */
+  /* DM Sans no texto, JetBrains Mono em todo comando, SHA, número medido,
+     nome de arquivo e `arquivo:linha`. Sempre. Ponteiro em fonte de texto
+     corrido se lê como opinião. */
+  --font-family-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-family-mono:
+    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    monospace;
+}
