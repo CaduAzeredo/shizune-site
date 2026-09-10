@@ -62,4 +62,25 @@
   ok    sem o arquivo, a mesma linha volta a passar
   ok    não anunciou exigência que não existe
 
+[chaves] o assinante escrito na linha é conferido contra a chave que assinou (ADR-046)
+
+  ok    o commit humano verifica como G por humana@teste (git disse "G / humana@teste")
+  ok    assinante que corresponde à chave passa
+  ok    anunciou que a conferência de chave está ligada
+  ok    decisão assinada pela chave de máquina reprova
+  ok    explicou que quem assinou foi a chave de máquina
+  ok    rascunho não é alcançado pela regra da chave de máquina
+  ok    assinante declarado que não corresponde à chave reprova
+  ok    disse qual nome a linha declarava
+  ok    disse qual chave de fato assinou
+  ok    assinante fora do mapa não reprova
+  ok    avisou que aquela linha não foi conferida
+  ok    assinante com nome composto é lido, não reprova como linha mal formada
+  ok    e foi de fato conferido contra a chave, não apenas ignorado
+  ok    nome composto apontado para a chave errada continua reprovando
+  ok    linha ininteligível no arquivo de chaves reprova
+  ok    explicou qual é o formato esperado
+  ok    sem o arquivo, assinante nenhum é conferido e nada reprova
+  ok    não anunciou conferência que não existe
+
 test-validate-decisions: tudo passou.

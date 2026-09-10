@@ -35,7 +35,7 @@
  * mão na `/method`, com o rótulo "measured in a private instance, <data>".
  */
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -280,9 +280,27 @@ try {
 
   semArvoreLocal("clone", clonado);
 
-  // `ls` puro: canalizado, o `ls` imprime uma entrada por linha, e é isso que
-  // a página mostra. Nada de `-la` — a página diz o que se baixa, não permissão.
-  const listagem = rodar("ls", [], clone).replace(/\r\n/g, "\n").trimEnd();
+  // A listagem da raiz do clone: uma entrada por linha, primeiro nível apenas.
+  // A página mostra o que se recebe ao baixar — não permissão, não recursão.
+  //
+  // Isto era `ls` puro por execFileSync, e o script só rodava onde `ls` existe.
+  // Na máquina do operador (Windows, fora do Git Bash) quebrava com
+  // `spawnSync ls ENOENT` — um gerador de números que depende do shell de quem
+  // o roda é a mesma classe de defeito que a ficha existe para evitar.
+  //
+  // `readdirSync` reproduz o `ls` exatamente, com duas condições que NÃO são
+  // detalhe: o filtro de dotfiles (o `ls` não mostra `.git`, `.github`,
+  // `.gitignore`, `.gitattributes`) e o `sort()` sem comparador, que ordena por
+  // code unit — a mesma ordem de byte do `ls` em locale C, com as maiúsculas
+  // antes das minúsculas. Conferido contra a captura da v0.4.0: idêntico byte
+  // a byte, 16 entradas.
+  //
+  // `git ls-files` seria a troca errada: lista os 66 arquivos rastreados,
+  // recursivamente e com dotfiles — outro número e outra página.
+  const listagem = readdirSync(clone)
+    .filter((nome) => !nome.startsWith("."))
+    .sort()
+    .join("\n");
   const entradas = listagem.split("\n").filter((l) => l.trim() !== "").length;
   if (entradas < 10) {
     console.error(`erro: o \`ls\` do clone devolveu ${entradas} entradas.`);

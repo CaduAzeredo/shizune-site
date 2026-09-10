@@ -1,7 +1,7 @@
 Cloning into 'shizune'...
-remote: Enumerating objects: 203, done.
-remote: Counting objects: 100% (203/203), done.
-remote: Compressing objects: 100% (118/118), done.
-remote: Total 203 (delta 72), reused 186 (delta 55), pack-reused 0 (from 0)
-Receiving objects: 100% (203/203), 202.00 KiB | 1.96 MiB/s, done.
-Resolving deltas: 100% (72/72), done.
+remote: Enumerating objects: 214, done.
+remote: Counting objects: 100% (214/214), done.
+remote: Compressing objects: 100% (122/122), done.
+remote: Total 214 (delta 80), reused 196 (delta 62), pack-reused 0 (from 0)
+Receiving objects: 100% (214/214), 214.58 KiB | 1.23 MiB/s, done.
+Resolving deltas: 100% (80/80), done.
