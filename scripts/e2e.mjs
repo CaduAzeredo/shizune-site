@@ -264,6 +264,12 @@ const ROTAS = [
       "A thin decision-registry layer on top of git.",
       "The registry",
       "A number is assigned once and never reassigned.",
+      // As duas metades da correção de 2026-09-09. A primeira era a contradição
+      // ("There are two" seguido de um terceiro estado implícito); a segunda é o
+      // que a desfaz. Ancoradas juntas porque separadas elas voltam a divergir.
+      "There are two:",
+      "Superseding is a rule, not a third state.",
+      "the validator knows only the draft and the rest",
       "What fails",
       "What a signature does and does not show",
       "it is not evidence of authorship",

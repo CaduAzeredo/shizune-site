@@ -65,12 +65,26 @@ export const secoes: readonly SecaoDeTexto[] = [
         { literal: "rascunho, assinatura pendente" },
         " — the draft, which exists and does not count — and ",
         { literal: "vigente" },
-        ", which a signer and a SHA turn it into. A decision that is superseded " +
-          "changes its status; it never changes its number.",
+        ", which a signer and a SHA turn it into.",
       ],
+      /**
+       * O parágrafo abaixo substitui, em 2026-09-09, uma contradição do texto
+       * original: ele dizia "There are two" e, três linhas adiante, "a decision
+       * that is superseded changes its status" — se há dois estados e nenhum é
+       * "superada", a frase não fecha.
+       *
+       * A redação nova foi conferida contra o que o validador FAZ, e não contra
+       * o que se diz que ele faz: `scripts/validate-decisions.mjs:197` testa
+       * `/^rascunho\b/i` no estado, e o ramo seguinte exige assinante e SHA
+       * resolvível para todo o resto. A palavra `vigente` aparece no código
+       * apenas em comentário — o validador não a conhece. Logo "the validator
+       * knows only the draft and the rest" é literal.
+       */
       [
-        "A line changes state when it is signed. What changes is the state and the " +
-          "signer; the number stays where it was.",
+        "Superseding is a rule, not a third state. A decision that is superseded " +
+          "is recorded as such in prose, and the validator knows only the draft " +
+          "and the rest. What never changes is the number: it is the handle, not " +
+          "the status.",
       ],
     ],
   },
