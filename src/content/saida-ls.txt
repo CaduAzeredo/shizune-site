@@ -1,0 +1,16 @@
+AGENTS.md
+CHANGELOG.md
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+LICENSE
+NOTICE
+QUICKSTART.md
+README.md
+SECURITY.md
+docs
+examples
+governance
+references
+scripts
+skills
+templates

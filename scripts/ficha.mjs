@@ -34,7 +34,7 @@
  * (19 decisões, 7 contribuições) não saem de clone nenhum. Continuam entrando à
  * mão na `/method`, com o rótulo "measured in a private instance, <data>".
  */
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -51,6 +51,8 @@ const DESTINO = path.join(RAIZ, "src/content/ficha.ts");
  * segunda cópia que poderia divergir em silêncio.
  */
 const DESTINO_CAPTURA = path.join(RAIZ, "src/content/saida-teste-negativo.txt");
+const DESTINO_CLONE = path.join(RAIZ, "src/content/saida-clone.txt");
+const DESTINO_LS = path.join(RAIZ, "src/content/saida-ls.txt");
 const REPO = "CaduAzeredo/shizune";
 const URL_CLONE = `https://github.com/${REPO}.git`;
 
@@ -61,6 +63,29 @@ function rodar(cmd, args, cwd) {
     maxBuffer: 32 * 1024 * 1024,
     windowsHide: true,
   });
+}
+
+/**
+ * Renderiza uma saída de terminal como o terminal a renderiza.
+ *
+ * O `git clone --progress` emite CENTENAS de quadros de progresso separados por
+ * `\r`. Num terminal, cada `\r` rebobina o cursor e o quadro seguinte sobrescreve
+ * o anterior — a pessoa vê **uma** linha por etapa, com o estado final. Salvo num
+ * arquivo, o mesmo fluxo vira 373 linhas.
+ *
+ * **Colapsar os quadros é RENDERIZAR, não editar.** `\r` é instrução de
+ * apresentação, não conteúdo; os espaços à direita são o apagador do próprio
+ * `git`. Apagar uma linha seria edição, e isso não acontece aqui. Medido em
+ * 2026-09-09: 373 linhas cruas → 7 renderizadas, idênticas às que aparecem no
+ * terminal.
+ */
+function comoNoTerminal(bruto) {
+  return bruto
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map((l) => l.split("\r").pop().replace(/\s+$/, ""))
+    .filter((l) => l !== "")
+    .join("\n");
 }
 
 /** Roda e devolve a saída mesmo quando o código de saída não é 0. */
@@ -103,7 +128,31 @@ const trabalho = mkdtempSync(path.join(tmpdir(), "ficha-shizune-"));
 const clone = path.join(trabalho, "shizune");
 
 try {
-  rodar("git", ["clone", "--quiet", URL_CLONE, clone], trabalho);
+  // O clone é capturado, e não silenciado: é ele que a `/` mostra.
+  //
+  // `--progress` está aqui por FIDELIDADE, não por aparência, e a escolha foi
+  // medida em 2026-09-09 rodando as duas versões. Sem o parâmetro, com a saída
+  // canalizada, o `git` imprime uma linha só — "Cloning into 'shizune'..." —,
+  // que é artefato do cano e NÃO é o que a pessoa vê. Com `--progress` vem o
+  // que ela vê ao rodar o comando publicado num terminal de verdade, porque lá
+  // o stderr é um tty e o progresso sai por padrão. O comando na página segue
+  // sem o parâmetro; quem o roda vê isto.
+  // SEM destino no argumento, e é obrigatório que seja assim. Passando o
+  // caminho absoluto, o `git` o ecoa — "Cloning into 'C:\Users\...'" — e a
+  // captura publica o diretório de trabalho e o nome de usuário de quem rodou.
+  // É a trava mais dura do dossiê: nunca a árvore local numa captura. Sem
+  // destino, o `git` deriva o nome do repositório e imprime "Cloning into
+  // 'shizune'...", que é o que a pessoa vê ao rodar o comando publicado.
+  const saidaClone = spawnSync("git", ["clone", "--progress", URL_CLONE], {
+    cwd: trabalho,
+    encoding: "utf8",
+    maxBuffer: 32 * 1024 * 1024,
+    windowsHide: true,
+  });
+  if (saidaClone.status !== 0) {
+    console.error(`erro: o clone de ${URL_CLONE} falhou.\n${saidaClone.stderr}`);
+    process.exit(1);
+  }
   rodar("git", ["checkout", "--quiet", tag], clone);
 
   const sha = rodar("git", ["rev-parse", "--short", "HEAD"], clone).trim();
@@ -188,9 +237,64 @@ try {
 
   // ── 4. o arquivo ───────────────────────────────────────────────────────
 
+  // ── 3.5 o que a pessoa vê ao clonar, e o que ela recebe ────────────────
+
+  const clonado = comoNoTerminal(saidaClone.stderr);
+  if (!clonado.startsWith("Cloning into 'shizune'")) {
+    console.error(
+      `erro: a saída do clone não começa como esperado.\n${clonado.slice(0, 200)}`,
+    );
+    process.exit(1);
+  }
+
+  /**
+   * A guarda contra vazamento de árvore local, mecânica e não por disciplina.
+   *
+   * Ela existe porque a primeira versão deste script VAZOU: passando o destino
+   * absoluto ao `git clone`, a captura saiu com
+   * "Cloning into 'C:\\Users\\<usuário>\\AppData\\Local\\Temp\\...'". Uma trava
+   * que depende de alguém reler a saída antes de publicar não é trava.
+   */
+  const VAZAMENTOS = [
+    [/[A-Za-z]:[\\/]/, "caminho absoluto do Windows"],
+    [/\/(?:home|Users)\//, "caminho absoluto POSIX"],
+    [/\\\\/, "caminho UNC"],
+    [
+      new RegExp(
+        path.basename(trabalho).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+      ),
+      "nome do diretório temporário",
+    ],
+  ];
+
+  const semArvoreLocal = (rotulo, texto) => {
+    for (const [re, oQue] of VAZAMENTOS) {
+      if (!re.test(texto)) continue;
+      console.error(
+        `erro: a captura do ${rotulo} contém ${oQue}.\n` +
+          "       A trava do dossiê é dura: nunca a árvore local numa captura.",
+      );
+      process.exit(1);
+    }
+  };
+
+  semArvoreLocal("clone", clonado);
+
+  // `ls` puro: canalizado, o `ls` imprime uma entrada por linha, e é isso que
+  // a página mostra. Nada de `-la` — a página diz o que se baixa, não permissão.
+  const listagem = rodar("ls", [], clone).replace(/\r\n/g, "\n").trimEnd();
+  const entradas = listagem.split("\n").filter((l) => l.trim() !== "").length;
+  if (entradas < 10) {
+    console.error(`erro: o \`ls\` do clone devolveu ${entradas} entradas.`);
+    process.exit(1);
+  }
+  semArvoreLocal("ls", listagem);
+
   const medidoEm = new Date().toISOString().slice(0, 10);
 
   writeFileSync(DESTINO_CAPTURA, `${saida}\n`, "utf8");
+  writeFileSync(DESTINO_CLONE, `${clonado}\n`, "utf8");
+  writeFileSync(DESTINO_LS, `${listagem}\n`, "utf8");
 
   const corpo = `/**
  * GERADO POR \`scripts/ficha.mjs\` — NÃO EDITE À MÃO.
@@ -202,11 +306,12 @@ try {
  * página é digitado: se um deles estiver errado, o erro está no comando, e o
  * comando está impresso ao lado do número na própria página.
  *
- * A captura do teste negativo NÃO está aqui: ela é
- * \`saida-teste-negativo.txt\`, ao lado, exatamente como o comando a imprimiu.
- * Quem revisa dá \`diff\` naquele arquivo contra uma execução nova.
+ * As capturas NÃO estão aqui: são os três \`.txt\` ao lado, exatamente como os
+ * comandos as imprimiram. Quem revisa dá \`diff\` neles contra uma execução nova.
  */
 import saidaTesteNegativo from "./saida-teste-negativo.txt?raw";
+import saidaClone from "./saida-clone.txt?raw";
+import saidaLs from "./saida-ls.txt?raw";
 
 export interface Ficha {
   /** A tag publicada, resolvida pela release marcada Latest no GitHub. */
@@ -227,6 +332,10 @@ export interface Ficha {
   };
   /** A saída literal de \`node scripts/test-validate-decisions.mjs\`. */
   readonly saidaTesteNegativo: string;
+  /** O que o \`git clone\` imprime, renderizado como no terminal. */
+  readonly saidaClone: string;
+  /** O \`ls\` da raiz do clone — o que se recebe ao baixar. */
+  readonly saidaLs: string;
 }
 
 export const ficha: Ficha = {
@@ -237,6 +346,8 @@ export const ficha: Ficha = {
   asseracoes: ${asseracoes},
   doctor: { total: ${doctorTotal}, executam: ${doctorOk}, na: ${doctorNa} },
   saidaTesteNegativo: saidaTesteNegativo.replace(/\\n$/, ""),
+  saidaClone: saidaClone.replace(/\\n$/, ""),
+  saidaLs: saidaLs.replace(/\\n$/, ""),
 };
 
 export default ficha;
@@ -251,6 +362,11 @@ export default ficha;
     `  doctor:                  ${doctorTotal} verificadores — ${doctorOk} executam, ${doctorNa} n/a`,
   );
   console.log(`  captura do teste:        ${saida.split("\n").length} linhas`);
+  console.log(
+    `  captura do clone:        ${clonado.split("\n").length} linhas renderizadas ` +
+      `(de ${saidaClone.stderr.split(/\r|\n/).length} quadros crus)`,
+  );
+  console.log(`  ls da raiz do clone:     ${entradas} entradas`);
   console.log(`\nficha: escrita em src/content/ficha.ts. Resultado: OK`);
 } finally {
   rmSync(trabalho, { recursive: true, force: true });

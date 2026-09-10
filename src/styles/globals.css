@@ -161,18 +161,28 @@
      por elemento, porque é a página inteira que precisa mudar junto quando o
      ritmo mudar — e porque `text-[16.5px] md:text-[16px]` repetido trinta vezes
      é a mesma decisão tomada trinta vezes. */
+  /* O título e o que o separa do corpo.
+
+     A distância importa mais que o tamanho. Antes, título→corpo eram 16px e
+     parágrafo→parágrafo também 16px: um título separado do próprio corpo pela
+     mesma distância que separa dois parágrafos deixa de ser título e vira a
+     primeira linha do bloco. Nove seções assim viram uma mancha — foi
+     exatamente a crítica do operador ao ler a /method de longe.
+
+     A razão agora é 1,6× no celular e 2× no desktop. É a proporção que faz a
+     hierarquia se ler sem esforço, e não há cor nem régua nova envolvida. */
   .titulo-secao {
-    margin: 0 0 16px;
-    font-size: 19px;
+    margin: 0 0 26px;
+    font-size: 20px;
     font-weight: 600;
-    letter-spacing: -0.012em;
+    letter-spacing: -0.018em;
     color: var(--foreground);
   }
 
   @media (min-width: 768px) {
     .titulo-secao {
-      margin-bottom: 20px;
-      font-size: 22px;
+      margin-bottom: 32px;
+      font-size: 25px;
     }
   }
 

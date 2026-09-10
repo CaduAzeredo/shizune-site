@@ -139,8 +139,23 @@ export function numerosMedidos(f: Ficha): readonly NumeroMedido[] {
   ];
 }
 
+/**
+ * O começo — e ele mostra o que se baixa, antes de a pessoa baixar.
+ *
+ * As duas saídas vêm da ficha, capturadas no mesmo clone limpo que mede os três
+ * números da página. **Nada aqui é desenhado.** Em particular: não há painel de
+ * IDE com árvore de pastas na lateral, e a ausência é decisão, não esquecimento
+ * — ao lado de um terminal que é prova, uma ilustração de pastas faria o leitor
+ * parar de saber qual dos dois é real. O que aparece é `ls`, porque `ls` é o que
+ * a pessoa vai digitar.
+ */
 export const comeco = {
   titulo: "Start",
   comando: CLONE,
+  /** O segundo comando, para ver o que veio. */
+  comandoLs: "cd shizune && ls",
+  /** A data vem da ficha; aqui só a frase em volta dela. */
+  legenda: (f: Ficha): string =>
+    `Captured from a clean clone on ${f.medidoEm} — one run, not an illustration.`,
   metodo: "Read the method →",
 } as const;

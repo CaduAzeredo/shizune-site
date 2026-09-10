@@ -1,18 +1,19 @@
 /**
  * GERADO POR `scripts/ficha.mjs` — NÃO EDITE À MÃO.
  *
- * Medido em 2026-09-09, num clone limpo de
+ * Medido em 2026-09-10, num clone limpo de
  * https://github.com/CaduAzeredo/shizune na tag v0.4.0 (b71f349).
  *
  * Trocar de release é rodar `npm run ficha` e publicar. Nenhum número desta
  * página é digitado: se um deles estiver errado, o erro está no comando, e o
  * comando está impresso ao lado do número na própria página.
  *
- * A captura do teste negativo NÃO está aqui: ela é
- * `saida-teste-negativo.txt`, ao lado, exatamente como o comando a imprimiu.
- * Quem revisa dá `diff` naquele arquivo contra uma execução nova.
+ * As capturas NÃO estão aqui: são os três `.txt` ao lado, exatamente como os
+ * comandos as imprimiram. Quem revisa dá `diff` neles contra uma execução nova.
  */
 import saidaTesteNegativo from "./saida-teste-negativo.txt?raw";
+import saidaClone from "./saida-clone.txt?raw";
+import saidaLs from "./saida-ls.txt?raw";
 
 export interface Ficha {
   /** A tag publicada, resolvida pela release marcada Latest no GitHub. */
@@ -33,16 +34,22 @@ export interface Ficha {
   };
   /** A saída literal de `node scripts/test-validate-decisions.mjs`. */
   readonly saidaTesteNegativo: string;
+  /** O que o `git clone` imprime, renderizado como no terminal. */
+  readonly saidaClone: string;
+  /** O `ls` da raiz do clone — o que se recebe ao baixar. */
+  readonly saidaLs: string;
 }
 
 export const ficha: Ficha = {
   tag: "v0.4.0",
   sha: "b71f349",
-  medidoEm: "2026-09-09",
+  medidoEm: "2026-09-10",
   arquivos: 66,
   asseracoes: 39,
   doctor: { total: 9, executam: 7, na: 2 },
   saidaTesteNegativo: saidaTesteNegativo.replace(/\n$/, ""),
+  saidaClone: saidaClone.replace(/\n$/, ""),
+  saidaLs: saidaLs.replace(/\n$/, ""),
 };
 
 export default ficha;

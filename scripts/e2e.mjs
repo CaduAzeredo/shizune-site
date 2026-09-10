@@ -39,7 +39,23 @@ const require = createRequire(import.meta.url);
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DIST = path.join(RAIZ, "dist");
 const PORTA = 4321;
-const BASE = `http://127.0.0.1:${PORTA}`;
+
+/**
+ * Contra o quê este teste roda.
+ *
+ * Sem `ALVO`, contra o `dist/` local, servido pelo modelo do `vercel.json` —
+ * é o portão antes do deploy. Com `ALVO=https://shizune.dev`, contra a
+ * produção, que é a reconferência que a ressalva sempre pediu: **redirect de
+ * domínio e certificado só existem lá.**
+ *
+ * As mesmas verificações de corpo valem nos dois. O que muda é de onde vem a
+ * resposta — e é justamente aí que já apareceu uma divergência entre o modelo
+ * e o Vercel, então rodar os dois não é redundância.
+ */
+const ALVO = process.env.ALVO?.replace(/\/$/, "") ?? "";
+const BASE = ALVO || `http://127.0.0.1:${PORTA}`;
+const EM_PRODUCAO = ALVO !== "";
+const HOST_WWW = "www.shizune.dev";
 
 /**
  * O navegador.
@@ -62,6 +78,33 @@ const CABECALHOS = Object.fromEntries(
   vercel.headers[0].headers.map((h) => [h.key, h.value]),
 );
 const REESCRITAS = new Set(vercel.rewrites.map((r) => r.source));
+
+/**
+ * O matcher de `source`, no mínimo que reproduz o comportamento observado.
+ *
+ * Ele existe por causa de uma falha que este teste DEIXOU PASSAR. A primeira
+ * versão do redirect de `www` era só `/:caminho*`, e o servidor local aplicava
+ * o redirect por host em qualquer caminho, sem olhar o `source` — então o
+ * modelo concordava comigo em vez de me pegar. Em produção,
+ * `www.shizune.dev/method` redirecionava e `www.shizune.dev/` respondia 200.
+ *
+ * Isto NÃO é uma implementação de path-to-regexp. São as três formas que este
+ * arquivo usa, com o comportamento **medido na produção do Vercel em
+ * 2026-09-09** — em especial a que importa: `/:nome*` não casa a raiz nua.
+ * Se uma forma nova entrar no `vercel.json`, o modelo reprova em vez de
+ * adivinhar, porque adivinhar é como o defeito passou da primeira vez.
+ */
+function casaSource(source, caminho) {
+  if (source === "/") return caminho === "/";
+  if (source === "/(.*)") return true;
+  const prefixo = source.match(/^\/:[A-Za-z]+\*$/);
+  if (prefixo) return caminho !== "/";
+  if (!source.includes(":") && !source.includes("(")) return source === caminho;
+  throw new Error(
+    `e2e: forma de "source" não modelada em vercel.json: ${source}\n` +
+      "     Acrescente-a a casaSource() com o comportamento MEDIDO na produção.",
+  );
+}
 
 const TIPOS = {
   ".html": "text/html; charset=utf-8",
@@ -88,10 +131,18 @@ function servidor() {
       res.end(corpo);
     };
 
-    // Redirect de domínio: www → apex, como o vercel.json declara.
-    const host = req.headers.host ?? "";
-    if (host.startsWith("www.")) {
-      res.writeHead(308, { Location: `https://shizune.dev${caminho}` });
+    // Os redirects do vercel.json, aplicados na ordem e com o `source` de
+    // verdade — não por host solto, que foi como o defeito da raiz passou.
+    const host = (req.headers.host ?? "").split(":")[0];
+    for (const regra of vercel.redirects ?? []) {
+      const condicao = (regra.has ?? []).every(
+        (h) => h.type === "host" && h.value === host,
+      );
+      if (!condicao || !casaSource(regra.source, caminho)) continue;
+      const destino = regra.destination
+        .replace(/:[A-Za-z]+\*/, caminho.replace(/^\//, ""))
+        .replace(/\$1/, caminho.replace(/^\//, ""));
+      res.writeHead(regra.permanent ? 308 : 307, { Location: destino });
       res.end();
       return;
     }
@@ -127,14 +178,34 @@ function servidor() {
   });
 }
 
-/** Um GET com o cabeçalho Host forjado — o que o `fetch` não permite. */
-function pedirCom(caminho, host) {
+/**
+ * Um GET ao host do `www`, sem seguir redirect.
+ *
+ * Local: o cabeçalho `Host` é forjado por http cru, porque o `fetch` reserva
+ * esse cabeçalho e o Host é justamente o que decide a regra. Em produção: o
+ * host é real, e a requisição vai por HTTPS de verdade.
+ */
+async function pedirCom(caminho) {
+  if (EM_PRODUCAO) {
+    const r = await fetch(`https://${HOST_WWW}${caminho}`, {
+      redirect: "manual",
+    });
+    return { status: r.status, location: r.headers.get("location") };
+  }
   return new Promise((resolve, reject) => {
     const req = pedir(
-      { host: "127.0.0.1", port: PORTA, path: caminho, headers: { Host: host } },
+      {
+        host: "127.0.0.1",
+        port: PORTA,
+        path: caminho,
+        headers: { Host: HOST_WWW },
+      },
       (res) => {
         res.resume();
-        resolve({ status: res.statusCode, location: res.headers.location ?? null });
+        resolve({
+          status: res.statusCode,
+          location: res.headers.location ?? null,
+        });
       },
     );
     req.on("error", reject);
@@ -167,6 +238,14 @@ const ROTAS = [
       "test-validate-decisions: tudo passou.",
       "Numbers you can reproduce",
       "git clone https://github.com/CaduAzeredo/shizune.git",
+      // A seção "Start": o que a pessoa vê ao clonar, e o que ela recebe.
+      // As capturas saem do mesmo clone medido — se sumirem, a seção voltou a
+      // ser um comando solto e o leitor deixou de ver o que vai baixar.
+      "Cloning into 'shizune'",
+      "Resolving deltas: 100%",
+      "cd shizune && ls",
+      "QUICKSTART.md",
+      "one run, not an illustration",
     ],
     /**
      * "Cadu Azeredo" aparece 3 vezes: o lockup do topo, o lockup do rodapé e a
@@ -190,6 +269,15 @@ const ROTAS = [
       "it is not evidence of authorship",
       "Measured in a private instance, 2026-09-09:",
       "Apache-2.0. Shizune™.",
+      // A seção Origins. As duas do meio são as frases em que a página admite
+      // defeito do próprio projeto — as primeiras a sumir se alguém decidir
+      // encurtar a história, e por isso as que mais precisam de âncora.
+      "Origins",
+      "the decision that started it is the only one with no record",
+      "The record came before the history",
+      "could sign in 36 milliseconds",
+      "a status code was being read instead of the body of the response",
+      "Michael Nygard",
     ],
     /**
      * 3, como nas outras rotas: os dois lockups e o fecho do rodapé.
@@ -242,12 +330,12 @@ const falha = (msg, detalhe) => {
   if (detalhe) linhas.push(`         ↑ ${detalhe}`);
 };
 
-if (!existsSync(DIST)) {
+if (!EM_PRODUCAO && !existsSync(DIST)) {
   console.error("erro: não há dist/. Rode o build antes do e2e.");
   process.exit(1);
 }
-const http = servidor();
-await new Promise((r) => http.listen(PORTA, "127.0.0.1", r));
+const http = EM_PRODUCAO ? null : servidor();
+if (http) await new Promise((r) => http.listen(PORTA, "127.0.0.1", r));
 
 const comoAbrir = existsSync(EXECUTAVEL)
   ? { executablePath: EXECUTAVEL }
@@ -257,7 +345,7 @@ let navegador;
 try {
   navegador = await chromium.launch(comoAbrir);
 } catch (e) {
-  await new Promise((r) => http.close(r));
+  if (http) await new Promise((r) => http.close(r));
   console.error(
     `erro: não consegui abrir o navegador.\n` +
       `       tentei: ${existsSync(EXECUTAVEL) ? EXECUTAVEL : "channel chrome"}\n` +
@@ -286,14 +374,27 @@ try {
 
     // `fetch` não deixa forjar o cabeçalho Host (o undici o reserva), e é
     // justamente o Host que decide este redirect. Então vai por http cru.
-    const w = await pedirCom("/method", "www.shizune.dev");
-    if (w.status === 308 && w.location === "https://shizune.dev/method")
-      ok("www.shizune.dev/method → 308 apex  (modelo local do vercel.json)");
-    else
-      falha(
-        "www deveria redirecionar para o apex",
-        `devolveu ${w.status} → ${w.location}`,
-      );
+    //
+    // A RAIZ É TESTADA SEPARADAMENTE, e a razão é uma falha real: a primeira
+    // versão desta regra era só `/:caminho*`, que no matcher do Vercel NÃO casa
+    // a raiz nua. Em produção, `www.shizune.dev/method` redirecionava e
+    // `www.shizune.dev/` respondia 200 — conteúdo duplicado no endereço mais
+    // visitado de todos. O teste não viu porque testava só `/method`: tinha o
+    // mesmo ponto cego da regra. Testar a raiz e um subcaminho, sempre.
+    for (const [caminho, destino] of [
+      ["/", "https://shizune.dev/"],
+      ["/method", "https://shizune.dev/method"],
+      ["/robots.txt", "https://shizune.dev/robots.txt"],
+    ]) {
+      const w = await pedirCom(caminho, "www.shizune.dev");
+      if (w.status === 308 && w.location === destino)
+        ok(`www.shizune.dev${caminho} → 308 ${destino}`);
+      else
+        falha(
+          `www${caminho} deveria devolver 308 para ${destino}`,
+          `devolveu ${w.status} → ${w.location}`,
+        );
+    }
   }
 
   // ── 2. as rotas ───────────────────────────────────────────────────────
@@ -748,7 +849,7 @@ try {
   }
 } finally {
   await navegador.close();
-  await new Promise((r) => http.close(r));
+  if (http) await new Promise((r) => http.close(r));
 }
 
 // ── relatório ───────────────────────────────────────────────────────────────
@@ -768,8 +869,11 @@ if (falhas.length > 0) {
 
 const total = linhas.filter((l) => l.startsWith("  ok")).length;
 console.log(
-  `e2e: ${total} verificações em ${ROTAS.length} rotas, todas no CORPO e não só no status. Resultado: OK`,
+  `e2e: ${total} verificações em ${ROTAS.length} rotas contra ${EM_PRODUCAO ? BASE : "o dist/ local"}, ` +
+    "todas no CORPO e não só no status. Resultado: OK",
 );
 console.log(
-  "     ressalva: redirect de domínio e certificado só existem na hospedagem — reconferir depois do deploy, lendo o corpo.",
+  EM_PRODUCAO
+    ? "     alvo: a produção. Redirect de domínio, certificado e o 404 da hospedagem foram medidos onde eles existem."
+    : "     ressalva: redirect de domínio e certificado só existem na hospedagem — reconferir com ALVO=https://shizune.dev, lendo o corpo.",
 );

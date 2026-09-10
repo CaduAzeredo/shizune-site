@@ -25,6 +25,19 @@ export const oQueE = {
 export interface SecaoDeTexto {
   readonly titulo: string;
   readonly paragrafos: readonly Frase[];
+  /**
+   * Desenha a parte como painel, com o traçado de conteúdo ao lado do título.
+   *
+   * Vale **só dentro de `origens`**, e só numa parte. São dois painéis na rota,
+   * e o segundo existe para ecoar o primeiro: a ressalva diz o que a assinatura
+   * não prova; "What the project stopped believing" conta o dia em que o
+   * projeto descobriu isso na própria pele. Mesma afirmação, dois registros —
+   * um normativo, um narrativo —, e a mesma superfície é o que liga os dois.
+   *
+   * **Não haverá um terceiro.** Três painéis e três glifos seriam o abuso da
+   * regra de lugares contados que já foi reprovada duas vezes.
+   */
+  readonly painel?: boolean;
 }
 
 export const secoes: readonly SecaoDeTexto[] = [
@@ -168,6 +181,207 @@ export const entrega = {
     " 19 decisions, of which 14 are current and 5 are drafts. Seven contributions " +
       "sent to third-party repositories, two accepted.",
   ] as Frase,
+} as const;
+
+/**
+ * A história — a última seção de CONTEÚDO da rota.
+ *
+ * Escrita pelo revisor em 2026-09-09 a partir do levantamento do executor, e
+ * entra com quatro mudanças, todas ratificadas pelo operador no mesmo dia:
+ *
+ * 1. **"the next day"**, e não "two days later": a DEC-014 (nome) é de 02/09 e
+ *    o ADR-044 (marca) é de 03/09 — um dia. O erro nasceu na prosa do
+ *    levantamento, cuja tabela trazia as duas datas certas.
+ * 2. **"one major model provider"**, e não "a large language model": foi um
+ *    fornecedor, não a indústria. Continua sem nome, pelo ADR-035.
+ * 3. **"Measured on 2026-09-01"** colado às 240 mil estrelas — contagem de
+ *    estrela muda todo dia, e o número não pode depender do antecedente da
+ *    frase anterior.
+ * 4. **"measured on that machine"** colado aos 36 ms — é o tempo naquela
+ *    máquina, não uma propriedade da assinatura. É a diferença entre medição e
+ *    alegação.
+ *
+ * Cada marco tem data e está ancorado num ADR ou numa DEC. A origem é relato do
+ * operador, rotulado como tal na própria seção, porque não existe em documento
+ * versionado — e é esse fato que abre a história.
+ *
+ * FICA DE FORA, de propósito: o material de neurociência que o repositório
+ * classifica como baixa evidência; nome de repositório de terceiro, de cliente
+ * ou de fornecedor de IA; e qualquer afirmação de que assinatura prova autoria
+ * humana. A frase sobre acreditar nisso está no passado e é desmentida na mesma
+ * frase — é o ponto da seção, não um deslize.
+ */
+export const origens = {
+  titulo: "Origins",
+  partes: [
+    {
+      titulo: "It started as the opposite of what it is",
+      paragrafos: [
+        [
+          "Shizune began as a memory problem. The operator wanted an assistant that " +
+            "could be spoken to and would act — and, underneath it, somewhere to keep " +
+            "what he could not hold in his head. His own words: he wanted to store " +
+            "things because his memory is bad.",
+        ],
+        [
+          "Two projects needed to stay in sync. Notes accumulated across tools that " +
+            "did not talk to each other. The question being asked was: how does the " +
+            "machine remember?",
+        ],
+        [
+          "What came out answers the opposite question: how does a human prove what " +
+            "they decided? Not a store that remembers for you — a record that counts " +
+            "only once you sign it.",
+        ],
+        [
+          "There is a detail worth admitting here. This project exists to record " +
+            "decisions, and the decision that started it is the only one with no " +
+            "record. The first architecture decision, dated 2026-08-25, names the " +
+            "repository and states its purpose; it does not say why the name was " +
+            "chosen, and nothing written down explains the intent behind it. The " +
+            "account above is the operator's, from memory, recorded here as that and " +
+            "nothing more.",
+        ],
+      ],
+    },
+    {
+      titulo: "The record came before the history",
+      paragrafos: [
+        [
+          "For two days the project deliberately had no version control — a written " +
+            "decision, ADR-004, postponed it. Documents were being kept before commits " +
+            "were. On 2026-08-27, ADR-017 reversed that, and the first commit landed " +
+            "two days after the first decision.",
+        ],
+        ["The order is backwards from the intuitive one, and it is documented."],
+      ],
+    },
+    {
+      titulo: "The question that turned it into a product",
+      paragrafos: [
+        [
+          "On 2026-08-02, one major model provider began watermarking the text its " +
+            "models generate. That answered a question — which tool touched this text " +
+            "— and the source itself was explicit that it could not answer a different " +
+            "one: a watermark can indicate a model was likely involved at some point, " +
+            "and no more.",
+        ],
+        [
+          "On 2026-09-01, that gap became the axis of the project. The watermark says " +
+            "what the machine wrote. The key says who pushed. Nobody was recording " +
+            "what the human decided.",
+        ],
+        [
+          { rotulo: "Measured on 2026-09-01:" },
+          " the three largest projects in the scaffolding layer carried more than " +
+            "240,000 stars between them, and none treated a decision as something that " +
+            "could be required. The scaffold stopped being the product and became a " +
+            "commodity. If this project has a single turning point, it is that one.",
+        ],
+      ],
+    },
+    {
+      titulo: "The record, then the validator",
+      paragrafos: [
+        [
+          "The numbered DEC-NNN record was fixed on 2026-09-01 and entered version " +
+            "control the next day. The validator and its negative test were born in " +
+            "the same commit — the test is not an afterthought to the tool; they are " +
+            "the same age.",
+        ],
+        [
+          "The draft state arrived with it, to settle a problem the record creates for " +
+            "itself: a decision is signed by a SHA that does not exist until the " +
+            "decision is signed. So the machine drafts, the human signs, and the SHA " +
+            "activates.",
+        ],
+        [
+          "The authorship frontier followed on 2026-09-02, and on 2026-09-05 the rule " +
+            "that a trusted key is required to sign — declared by the instance, never " +
+            "by the script.",
+        ],
+      ],
+    },
+    {
+      titulo: "The name",
+      paragrafos: [
+        [
+          "The product was called something else first. On 2026-09-01 a candidate name " +
+            "was rejected at the availability gate: the .dev domain was taken by a " +
+            "product in the same category, which a suffix does not fix. That rejection " +
+            "produced a rule — availability is checked before a name is proposed, " +
+            "never after one is chosen.",
+        ],
+        [
+          "Shizune (静音, quiet sound) cleared the gate on 2026-09-02. The brand " +
+            "followed the next day, and the gap is the point: the old naming decision " +
+            "was still in force, and applying a new name to the package while an older " +
+            "decision fixed the old one would have made the repository claim two " +
+            "brands at once. The decision comes first.",
+        ],
+      ],
+    },
+    {
+      titulo: "What the project stopped believing",
+      painel: true,
+      paragrafos: [
+        [
+          "This is the part worth reading closely, because it is where the caveat " +
+            "above comes from.",
+        ],
+        [
+          "For a time, this project believed that a commit signed with a key proved a " +
+            "human was present. On 2026-09-04, that was tested and found false: the " +
+            "private key had no passphrase, so any process running as the user — " +
+            "including an agent session — could sign in 36 milliseconds with no prompt, ",
+          { rotulo: "measured on that machine" },
+          ". A decision that had been treated as signed was reverted to draft, and the " +
+            'commit that "signed" it was declared invalid as a signature.',
+        ],
+        [
+          "Two days later, four earlier decisions were re-signed, because their " +
+            "original signatures were commits carrying no key at all. The defect was " +
+            "written into each line rather than corrected quietly.",
+        ],
+        [
+          "And in September, a two-day diagnosis reached the wrong cause because the " +
+            "method failed before the diagnosis did: for two days, a status code was " +
+            "being read instead of the body of the response. The rule that came out of " +
+            "it — check the string in the body, never the status alone — is now " +
+            "enforced by the tests of this very site.",
+        ],
+        [
+          "None of that is incidental. A tool that claims to verify has to survive " +
+            "being verified, and each of those was found by running a command, not by " +
+            "reading carefully.",
+        ],
+      ],
+    },
+    {
+      titulo: "Where the study came from",
+      paragrafos: [
+        [
+          "The ADR format comes from Michael Nygard's 2011 note on documenting " +
+            "architecture decisions — the foundation the rest is built on. The working " +
+            "pipeline was shaped by published material on agent engineering; the skill " +
+            "format follows the documented specification. Documentation structure " +
+            "follows Diátaxis; commits follow Conventional Commits; the changelog " +
+            "follows Keep a Changelog; versions follow SemVer.",
+        ],
+        ["The full reference list ships with the package."],
+      ],
+    },
+    {
+      titulo: "Still open",
+      paragrafos: [
+        [
+          "The signing mechanism is a written open question: SSH, GPG, or something " +
+            "built on an existing transparency system. It is recorded as open rather " +
+            "than settled.",
+        ],
+      ],
+    },
+  ] as readonly SecaoDeTexto[],
 } as const;
 
 /**

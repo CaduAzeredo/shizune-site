@@ -13,6 +13,7 @@ import {
 } from "@/content/home";
 import { GlifoCompacto, GlifoConteudo } from "@/components/layout/glifo";
 import BlocoDeComando from "@/components/ui/bloco-de-comando";
+import BlocoDeSaida from "@/components/ui/bloco-de-saida";
 import BlocoDeTerminal from "@/components/ui/bloco-de-terminal";
 import Prosa from "@/components/ui/prosa";
 
@@ -97,7 +98,8 @@ export function Home() {
 
       {/* ── como funciona ─────────────────────────────────────────────── */}
       <section className="coluna pt-12 pb-12 md:pt-15 md:pb-16">
-        <div className="mb-5 flex items-center gap-3">
+        {/* Acompanha o espaçamento de `.titulo-secao`; ver a nota em method.tsx. */}
+        <div className="mb-6.5 flex items-center gap-3 md:mb-8">
           <span aria-hidden="true" className="text-accent-amber">
             <GlifoConteudo tamanho={24} />
           </span>
@@ -156,7 +158,24 @@ export function Home() {
       {/* ── o começo ──────────────────────────────────────────────────── */}
       <section className="coluna pt-12 pb-16 md:pt-15 md:pb-21">
         <h2 className="titulo-secao">{comeco.titulo}</h2>
-        <BlocoDeComando className="mb-5.5">{comeco.comando}</BlocoDeComando>
+
+        {/* O comando, e o que ele imprime. Depois o `ls`, e o que ele imprime.
+            As duas saídas são capturas do mesmo clone que mede os números acima
+            — o leitor vê o que vai baixar antes de baixar. */}
+        <BlocoDeComando className="mb-3">{comeco.comando}</BlocoDeComando>
+        <BlocoDeSaida
+          saida={ficha.saidaClone}
+          rotulo="Output of git clone"
+          className="mb-6"
+        />
+
+        <BlocoDeComando className="mb-3">{comeco.comandoLs}</BlocoDeComando>
+        <BlocoDeSaida saida={ficha.saidaLs} rotulo="Contents of the package" />
+
+        <p className="texto-mudo mt-5 mb-7 text-[13.5px] md:text-[14.5px]">
+          {comeco.legenda(ficha)}
+        </p>
+
         {/* `min-h-6`: o piso de 24px da WCAG 2.2 (2.5.8) para alvo de toque.
             Um link de linha única tem 21px de altura e ficaria abaixo dele. */}
         <Link

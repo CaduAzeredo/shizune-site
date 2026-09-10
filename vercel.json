@@ -3,6 +3,12 @@
   "trailingSlash": false,
   "redirects": [
     {
+      "source": "/",
+      "has": [{ "type": "host", "value": "www.shizune.dev" }],
+      "destination": "https://shizune.dev/",
+      "permanent": true
+    },
+    {
       "source": "/:caminho*",
       "has": [{ "type": "host", "value": "www.shizune.dev" }],
       "destination": "https://shizune.dev/:caminho*",
