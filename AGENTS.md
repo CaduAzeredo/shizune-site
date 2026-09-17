@@ -10,7 +10,7 @@ repositório ganha** e o dossiê é corrigido.
 
 ---
 
-## As sete regras que não se renegociam
+## As oito regras que não se renegociam
 
 ### 1. Todo número da página é medido, nunca digitado
 
@@ -86,6 +86,27 @@ estacionamento do registrador respondendo.
 Por isso também **não há reescrita geral de SPA**: caminho desconhecido recebe `404.html`
 com **status 404** de verdade, e não um `200` com cara de erro.
 
+### 8. Um fato que muda arrasta todas as superfícies que o afirmam — na mesma passada
+
+Os mesmos fatos vivem em mais de um lugar: aqui (`/` e `/method`), no site pessoal
+(`caduazeredo.com/shizune`, `/novidades`, a home e a ficha da Rei) e no Brain. Atualizar um
+lugar por vez é como a `/novidades` ficou uma semana atrás e como um badge de versão sobreviveu
+a uma passada inteira de correção. A regra completa, com o inventário das superfícies, vive no
+Brain em `projects/cadu-azeredo/regra-de-propagacao-entre-superficies.md`; o que este
+repositório precisa saber na hora de mexer:
+
+| Se mudar… | …aqui acompanham | …e fora daqui |
+| :--- | :--- | :--- |
+| **a tag publicada** | `npm run ficha` (a tag é saída, nunca digitada) → `ficha.ts` e a saída do teste negativo → as âncoras de `/` no `e2e` | `versaoPublicada`/`shaPublicado` e o cartão de check runs do site pessoal; badge e JSON-LD da home; a Rei; verbete `lancamento` na `/novidades` |
+| **um número de instância** (decisões N/V/R) | a frase de instância em `method.ts` **e** a data de `MEDIDO_EM_INSTANCIA` → a âncora do rótulo no `e2e` | o cartão "decisões" e `medidoEm`/`shaMedicao` do site pessoal; a faixa da home; a ficha da Rei |
+| **um fato novo** (contribuição, embargo, decisão) | o bloco que o afirma em `method.ts` → âncoras novas no `e2e` | toda página do site pessoal que afirma o fato; verbete datado na `/novidades` **na mesma passada**; a ficha da Rei |
+| **uma trava** | a seção acima **e** `PROIBIDO` no `e2e` **e** os comentários que explicavam a trava antiga (`grep` pela regra antiga em `src/` e `scripts/`) | os mesmos três lugares no site pessoal; `content/README.md` no Brain |
+
+A ordem é sempre: Brain → medir → este site → site pessoal → `/novidades` → Rei → contratos →
+**verificar pelo corpo**. Quando uma superfície **não puder** acompanhar na mesma passada, o
+atraso é declarado — no registro datado do Brain, num comentário `ATRASADO desde <data>` no topo
+do arquivo atrasado, e na fila se passar de uma passada. Nunca em silêncio.
+
 ---
 
 ## O portão
@@ -130,7 +151,12 @@ Nunca, no texto ou na arte — e o `e2e` confere as que dão para conferir mecan
   **auditable decision governance**; "diagnóstico" nomeia a atividade
 - número de versão no corpo — a tag aparece só no comando de clone
 - exclamação; "save time"; "10x"; número redondo sem comando
-- nome de cliente, de alvo, de issue ou de fornecedor de IA
+- nome de cliente ou de fornecedor de IA; nome de alvo ou de issue **só das contribuições
+  enviadas há mais de 14 dias** (as sete da primeira rodada, públicas desde 2026-09-16 — o
+  bloco `contribuicoes` da `/method`), e **nunca contagem de achados** — por alvo ou agregada.
+  *(Até 2026-09-16 esta linha proibia todo nome de alvo e de issue: o embargo dos alvos
+  venceu em 2026-09-15, e o que libera um achado é envio ao mantenedor mais 14 dias, não uma
+  data. Achado não enviado não entra nunca.)*
 - comando com caminho local, SHA privado, ou árvore que o leitor não tenha
 - ícone de robô, cérebro, circuito, chip, escudo, cadeado, selo de verificação, kanji ou
   qualquer referência a anime

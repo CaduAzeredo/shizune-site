@@ -3,6 +3,7 @@ import { seoMethod } from "@/content/seo";
 import ficha from "@/content/ficha";
 import { CLONE } from "@/content/home";
 import {
+  contribuicoes,
   entrega,
   exigencia,
   fronteira,
@@ -219,6 +220,30 @@ export function Method() {
         <p className="texto-mudo mt-5">
           <Prosa frase={entrega.instancia} />
         </p>
+      </section>
+
+      <hr className="h-px border-0 bg-border" />
+
+      {/* ── as contribuições ──────────────────────────────────────────────
+          A única seção da rota com comando ao lado de números que não saem do
+          clone: estes saem do GitHub, e qualquer pessoa reproduz. Sem contagem
+          de achados, por decisão do operador de 2026-09-16 — ver o comentário
+          do bloco em `content/method.ts`. */}
+      <section className="coluna py-8.5 md:py-11">
+        <h2 className="titulo-secao">{contribuicoes.titulo}</h2>
+        <p className="texto">{contribuicoes.texto}</p>
+        <ul className="mt-5 list-none p-0">
+          {contribuicoes.itens.map((c) => (
+            <li key={c.url} className="texto py-1">
+              <a href={c.url} className="font-mono text-[14px]">
+                {c.repo}#{c.numero}
+              </a>{" "}
+              — {c.tipo}, {c.estado}
+            </li>
+          ))}
+        </ul>
+        <p className="texto-mudo mt-3 mb-4">{contribuicoes.medidoEm}</p>
+        <BlocoDeComando>{contribuicoes.comando}</BlocoDeComando>
       </section>
 
       <hr className="h-px border-0 bg-border" />

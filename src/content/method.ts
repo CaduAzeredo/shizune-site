@@ -9,11 +9,26 @@
  * carregam o rótulo "Measured in a private instance, <data>" colado ao número,
  * e por isso não há comando ao lado deles — o comando rodaria numa árvore que
  * o leitor não tem, e um comando que ninguém pode rodar é decoração.
+ *
+ * **Uma exceção, declarada aqui para que este cabeçalho não minta sobre o
+ * arquivo (2026-09-16):** o bloco `contribuicoes` tem comando ao lado. Aquelas
+ * sete linhas não são de instância — são issues e pull requests públicos no
+ * GitHub, e o comando as lista para qualquer pessoa com `gh` autenticado. Elas
+ * saem do rótulo de instância pelo mesmo motivo que os outros números entram
+ * nele: procedência. Ver o comentário do próprio bloco.
+ *
+ * PROPAGAÇÃO — este arquivo afirma fatos que também vivem em: `scripts/e2e.mjs`
+ * (as âncoras de texto da `/method`, inclusive a data do rótulo), no site
+ * pessoal (`src/content/shizune.ts`: cartão "decisões", `medidoEm`,
+ * `shaMedicao`, seção das contribuições; `shizune-ficha.ts`: a Rei;
+ * `novidades.ts`: o verbete do fato) e no Brain. **Mudou aqui, muda lá na
+ * mesma passada** — ver AGENTS.md § 8. Se algum não puder acompanhar, o atraso
+ * é declarado, nunca silencioso.
  */
 import type { Frase } from "./prosa";
 
 /** Rotulado à mão, de propósito: não sai de clone. Ver o cabeçalho. */
-export const MEDIDO_EM_INSTANCIA = "Measured in a private instance, 2026-09-09:";
+export const MEDIDO_EM_INSTANCIA = "Measured in a private instance, 2026-09-16:";
 
 export const oQueE = {
   titulo: "What this is",
@@ -192,9 +207,101 @@ export const entrega = {
     "are themselves tested.",
   instancia: [
     { rotulo: MEDIDO_EM_INSTANCIA },
-    " 19 decisions, of which 14 are current and 5 are drafts. Seven contributions " +
-      "sent to third-party repositories, two accepted.",
+    " 20 decisions, of which 15 are current and 5 are drafts.",
   ] as Frase,
+} as const;
+
+/**
+ * As contribuições da primeira rodada — o único bloco desta rota com comando ao
+ * lado, e a exceção está declarada no cabeçalho do arquivo.
+ *
+ * Estes números NÃO são de instância: são sete issues e pull requests públicos
+ * no GitHub, e o comando abaixo os lista para qualquer pessoa com `gh`
+ * autenticado. Por isso saem do rótulo "Measured in a private instance" — até
+ * 2026-09-16 a frase "Seven contributions sent to third-party repositories, two
+ * accepted" vivia dentro dele, sem nome e sem link, porque os alvos estavam
+ * sob embargo de divulgação responsável. O embargo venceu em 2026-09-15.
+ *
+ * **Nenhuma contagem de achados aqui** — nem por alvo, nem agregada. Decisão do
+ * operador em 2026-09-16: o total anunciaria defeitos encontrados e não
+ * contados aos mantenedores, e numa página de produto a pergunta fica sem
+ * resposta. O total vive no relatório escrito. A evidência aqui são os links.
+ *
+ * Quem editar isto: rode o comando e confira o estado de cada linha. `estado` é
+ * fato do dia da medição, não propriedade da contribuição.
+ */
+export interface Contribuicao {
+  readonly repo: string;
+  readonly numero: number;
+  readonly tipo: "issue" | "pull request";
+  readonly estado: string;
+  readonly url: string;
+}
+
+export const contribuicoes = {
+  titulo: "Contributions to third-party repositories",
+  texto:
+    "The method was first run against four public repositories, on 2026-09-01. " +
+    "Seven contributions were sent — six issues and one pull request — and two " +
+    "were accepted by the maintainers. Every one is public on GitHub; the " +
+    "command below reproduces the list.",
+  medidoEm: "State as of 2026-09-16.",
+  comando:
+    "for r in rohitg00/agentmemory mem0ai/mem0 topoteretes/cognee TeleAI-UAGI/Awesome-Agent-Memory; do\n" +
+    '  gh api "search/issues?q=repo:$r+author:CaduAzeredo" \\\n' +
+    "    --jq '.items[] | \"\\(.number)\\t\\(.state)\\t\\(.title)\"'\n" +
+    "done",
+  itens: [
+    {
+      repo: "TeleAI-UAGI/Awesome-Agent-Memory",
+      numero: 98,
+      tipo: "pull request",
+      estado: "merged 2026-09-01",
+      url: "https://github.com/TeleAI-UAGI/Awesome-Agent-Memory/pull/98",
+    },
+    {
+      repo: "TeleAI-UAGI/Awesome-Agent-Memory",
+      numero: 100,
+      tipo: "issue",
+      estado: "closed as completed 2026-09-03",
+      url: "https://github.com/TeleAI-UAGI/Awesome-Agent-Memory/issues/100",
+    },
+    {
+      repo: "mem0ai/mem0",
+      numero: 7202,
+      tipo: "issue",
+      estado: "open",
+      url: "https://github.com/mem0ai/mem0/issues/7202",
+    },
+    {
+      repo: "topoteretes/cognee",
+      numero: 4865,
+      tipo: "issue",
+      estado: "open",
+      url: "https://github.com/topoteretes/cognee/issues/4865",
+    },
+    {
+      repo: "rohitg00/agentmemory",
+      numero: 1313,
+      tipo: "issue",
+      estado: "open",
+      url: "https://github.com/rohitg00/agentmemory/issues/1313",
+    },
+    {
+      repo: "rohitg00/agentmemory",
+      numero: 1314,
+      tipo: "issue",
+      estado: "open",
+      url: "https://github.com/rohitg00/agentmemory/issues/1314",
+    },
+    {
+      repo: "rohitg00/agentmemory",
+      numero: 1315,
+      tipo: "issue",
+      estado: "open",
+      url: "https://github.com/rohitg00/agentmemory/issues/1315",
+    },
+  ] as readonly Contribuicao[],
 } as const;
 
 /**

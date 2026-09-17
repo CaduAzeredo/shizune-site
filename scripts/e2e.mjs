@@ -273,7 +273,20 @@ const ROTAS = [
       "What fails",
       "What a signature does and does not show",
       "it is not evidence of authorship",
-      "Measured in a private instance, 2026-09-09:",
+      "Measured in a private instance, 2026-09-16:",
+      // As contribuições — a seção que entrou em 2026-09-16, quando o embargo
+      // dos alvos venceu. Sete âncoras, uma por linha da lista, mais o título e
+      // a data de estado: se a seção sumir, ou perder uma linha, ou alguém
+      // "atualizar" a data sem remedir, isto reprova.
+      "Contributions to third-party repositories",
+      "TeleAI-UAGI/Awesome-Agent-Memory#98",
+      "TeleAI-UAGI/Awesome-Agent-Memory#100",
+      "mem0ai/mem0#7202",
+      "topoteretes/cognee#4865",
+      "rohitg00/agentmemory#1313",
+      "rohitg00/agentmemory#1314",
+      "rohitg00/agentmemory#1315",
+      "State as of 2026-09-16.",
       "Apache-2.0. Shizune™.",
       // A seção Origins. As duas do meio são as frases em que a página admite
       // defeito do próprio projeto — as primeiras a sumir se alguém decidir
