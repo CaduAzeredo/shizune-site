@@ -15,7 +15,11 @@
       "permanent": true
     }
   ],
-  "rewrites": [{ "source": "/method", "destination": "/index.html" }],
+  "rewrites": [
+    { "source": "/method", "destination": "/index.html" },
+    { "source": "/evidence", "destination": "/index.html" },
+    { "source": "/roadmap", "destination": "/index.html" }
+  ],
   "headers": [
     {
       "source": "/(.*)",

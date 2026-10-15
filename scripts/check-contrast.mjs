@@ -132,6 +132,36 @@ const PARES = [
     uso: "fio quente e borda",
   },
   { fg: "status-alert", bg: "background", min: 4.5, uso: "o 404" },
+  {
+    fg: "status-alert",
+    bg: "surface",
+    min: 4.5,
+    uso: "o rótulo ◆ fails e ◆ does not show, dentro do card",
+  },
+  {
+    fg: "status-alert",
+    bg: "surface-elevated",
+    min: 4.5,
+    uso: "a palavra reprovou dentro da captura",
+  },
+  {
+    fg: "foreground",
+    bg: "surface-produto",
+    min: 4.5,
+    uso: "texto do cartão do produto e do degrau em andamento",
+  },
+  {
+    fg: "muted-foreground",
+    bg: "surface-produto",
+    min: 4.5,
+    uso: "texto secundário do cartão do produto",
+  },
+  {
+    fg: "accent-amber",
+    bg: "surface-produto",
+    min: 4.5,
+    uso: "o rótulo ◆ this is Shizune e o ◐ now do degrau",
+  },
 ];
 
 /** Não textuais. Piso de sanidade declarado, não alegação de WCAG. */
@@ -150,6 +180,21 @@ const SEPARADORES = [
     min: 1.05,
     uso: "a elevação do terminal",
   },
+  { fg: "border-strong", bg: "background", min: 1.1, uso: "a faixa e o cartão tracejado" },
+  { fg: "border-strong", bg: "surface", min: 1.05, uso: "a borda do bloco de comando" },
+  {
+    fg: "accent-amber-line",
+    bg: "background",
+    min: 1.5,
+    uso: "o fio do cartão do produto sobre a página",
+  },
+  {
+    fg: "accent-amber-line",
+    bg: "surface-produto",
+    min: 1.5,
+    uso: "o fio do cartão do produto sobre o próprio fundo",
+  },
+  { fg: "primary-line", bg: "surface", min: 1.5, uso: "o fio do degrau feito" },
 ];
 
 // ── leitura dos tokens ──────────────────────────────────────────────────────

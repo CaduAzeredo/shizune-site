@@ -6,10 +6,11 @@
 #
 # O que o CI NÃO roda, e é de propósito:
 #
-# - `bun run ficha` — ela clona o pacote público e pergunta ao GitHub qual é a
-#   release Latest. Rodá-la aqui faria os números da página mudarem sozinhos
-#   num push, sem ninguém ver o diff. A ficha é gerada à mão e commitada; o
-#   `portao` confere que a página bate com o arquivo commitado.
+# - `node scripts/ficha.mjs` — ela troca a ficha da release que o site lê. A
+#   ficha entra por PR, com o diff à vista: pela cadeia (um workflow agendado
+#   que confere a ficha e abre o PR em `preview/*`) ou à mão. Trocá-la num
+#   push faria os números da página mudarem sem ninguém ver o diff; o `portao`
+#   confere que a página bate com o arquivo commitado.
 # - `bun run arte` — mesma razão: arte gerada em CI entra sem revisão visual.
 name: portão
 

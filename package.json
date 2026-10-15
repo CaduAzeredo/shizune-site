@@ -9,12 +9,12 @@
     "lint": "eslint .",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"scripts/*.mjs\" \"*.{ts,json,html}\"",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
-    "check": "node scripts/check-contrast.mjs && node scripts/check-motion.mjs && node scripts/check-slop.mjs",
+    "check": "node scripts/check-contrast.mjs && node scripts/check-motion.mjs && node scripts/check-slop.mjs && node scripts/test-publicacao.mjs",
     "peso": "node scripts/check-peso.mjs",
     "e2e": "node scripts/e2e.mjs",
     "ficha": "node scripts/ficha.mjs",
     "arte": "node scripts/arte.mjs",
-    "portao": "node scripts/check-contrast.mjs && node scripts/check-motion.mjs && node scripts/check-slop.mjs && tsc --noEmit -p tsconfig.app.json && eslint . && tsc -b && vite build && node scripts/pos-build.mjs && node scripts/check-peso.mjs && node scripts/e2e.mjs"
+    "portao": "node scripts/check-contrast.mjs && node scripts/check-motion.mjs && node scripts/check-slop.mjs && node scripts/test-publicacao.mjs && tsc --noEmit -p tsconfig.app.json && eslint . && tsc -b && vite build && node scripts/pos-build.mjs && node scripts/check-peso.mjs && node scripts/e2e.mjs"
   },
   "dependencies": {
     "react": "^19.2.7",

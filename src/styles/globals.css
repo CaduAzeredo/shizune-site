@@ -93,19 +93,6 @@
     border-radius: 6px;
   }
 
-  .superficie-cmd {
-    background-color: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 5px;
-    overflow-x: auto;
-  }
-
-  /* Bloco de comando DENTRO de um cartão afunda em vez de subir: dois níveis
-     iguais encostados leem como um só. */
-  .superficie-card .superficie-cmd {
-    background-color: var(--background);
-  }
-
   .superficie-term {
     background-color: var(--surface-elevated);
     border: 1px solid var(--border);
@@ -140,19 +127,22 @@
     background-color: var(--background);
   }
 
-  /* ── A coluna de leitura ───────────────────────────────────────────────
-     Uma medida só, nas duas rotas. 760px com 40px de respiro dá ~680px de
-     texto: perto de 75 caracteres em 16,5px, que é onde a linha para de
-     cansar. No celular o respiro cai para 20px e a medida é a tela. */
-  .coluna {
-    max-width: 760px;
+  /* ── A largura da página ───────────────────────────────────────────────
+     1200px com 24px de respiro no desktop e 16px no celular, como as telas de
+     15/10. A medida de LEITURA continua curta: o texto corrido de cada bloco
+     tem teto em `ch`, e quem passa de 1200px é grade de cartões, não linha de
+     texto. Até a rota das quatro páginas a página inteira tinha 760px; com
+     sumário lateral e grades de três, 760px espremia cada cartão até o literal
+     vazar pela borda. */
+  .largura {
+    max-width: 1200px;
     margin-inline: auto;
-    padding-inline: 20px;
+    padding-inline: 16px;
   }
 
-  @media (min-width: 768px) {
-    .coluna {
-      padding-inline: 40px;
+  @media (min-width: 600px) {
+    .largura {
+      padding-inline: 24px;
     }
   }
 
@@ -338,5 +328,1197 @@
       font-size: 12.5px;
       padding: 11px 24px;
     }
+  }
+
+  /* A palavra que é o validador recusando. Vermelho só aqui e no 404. */
+  .term-reprova {
+    color: var(--status-alert);
+  }
+
+  /* A linha que o exemplo explica. Um fundo um tom acima, e nada mais. */
+  .term-destaque {
+    display: inline-block;
+    min-width: 100%;
+    background-color: var(--surface);
+  }
+}
+
+/* ============================================================================
+   A rota das quatro páginas (15/10).
+
+   As telas 11 a 14 e a home v3 do design, traduzidas para os tokens deste site.
+   Mesma régua do resto: superfície por borda, cor só onde tem função, nenhuma
+   sombra, nenhum gradiente. O âmbar vira fio em lugares contados — o cartão do
+   produto, o degrau em andamento, o nível N2, a coluna "where Shizune connects".
+   ========================================================================= */
+@layer components {
+  /* ── topo e rodapé ───────────────────────────────────────────────────── */
+  .topo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 24px;
+    padding-block: 14px;
+  }
+
+  .topo-marca {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 32px;
+    color: var(--foreground);
+  }
+
+  .topo-marca:hover {
+    color: var(--foreground);
+  }
+
+  .topo-nome {
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+  }
+
+  .topo-nav,
+  .rodape-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 22px;
+    font-family: var(--font-family-mono);
+    font-size: 14px;
+  }
+
+  .rodape-nav {
+    font-size: 13px;
+    gap: 4px 20px;
+  }
+
+  /* 24×24 no mínimo, nas duas medidas (WCAG 2.2, 2.5.8): o "pt" tem duas
+     letras, e sem a largura mínima ele ficava com 17px. */
+  .topo-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    min-height: 24px;
+    color: var(--muted-foreground);
+  }
+
+  .topo-link:hover,
+  .topo-link-atual {
+    color: var(--foreground);
+  }
+
+  .topo-github {
+    color: var(--primary);
+  }
+
+  .rodape {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px;
+    padding-block: 44px 56px;
+  }
+
+  .rodape-linhas {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--muted-foreground);
+  }
+
+  .rodape-linhas p {
+    margin: 0;
+  }
+
+  /* O crédito do autor (15/10, 12h43): "Shizune by Cadu Azeredo". O nome vem
+     em Newsreader Italic, baixada só com os caracteres dele (o `&text=` do
+     link no index.html); sem a fonte, cai na Georgia itálica. A tinta é o
+     âmbar: o fio sob o nome acende nele no foco e no ponteiro. */
+  .credito {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    font-size: 15px;
+    color: var(--foreground);
+  }
+
+  .credito-por {
+    color: var(--muted-foreground);
+  }
+
+  .credito-autor {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    color: var(--foreground);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+    font-family: "Newsreader", Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 18px;
+  }
+
+  .credito-autor:hover,
+  .credito-autor:focus-visible {
+    border-bottom-color: var(--accent-amber);
+  }
+
+  /* ── escala de títulos e rótulos ─────────────────────────────────────── */
+  .rotulo-secao {
+    margin: 0;
+    font-family: var(--font-family-mono);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--muted-foreground);
+  }
+
+  .rotulo-passo {
+    font-family: var(--font-family-mono);
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--muted-foreground);
+  }
+
+  .titulo-1 {
+    margin: 0;
+    font-size: 36px;
+    line-height: 1.08;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    color: var(--foreground);
+    text-wrap: balance;
+  }
+
+  .titulo-2 {
+    margin: 0;
+    font-size: 26px;
+    line-height: 1.15;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--foreground);
+    text-wrap: balance;
+  }
+
+  .titulo-3 {
+    margin: 0;
+    font-size: 19px;
+    line-height: 1.3;
+    font-weight: 600;
+    color: var(--foreground);
+  }
+
+  .titulo-cartao {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.35;
+    font-weight: 600;
+    color: var(--foreground);
+  }
+
+  .titulo-passo {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--foreground);
+  }
+
+  .titulo-degrau {
+    margin: 0;
+    font-size: 21px;
+    line-height: 1.25;
+    font-weight: 600;
+    color: var(--foreground);
+  }
+
+  @media (min-width: 768px) {
+    .titulo-1 {
+      font-size: 50px;
+    }
+
+    .titulo-2 {
+      font-size: 33px;
+    }
+  }
+
+  .chamada {
+    margin: 0;
+    max-width: 64ch;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--muted-foreground);
+  }
+
+  .chamada-grande {
+    margin: 0;
+    max-width: 62ch;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--foreground);
+  }
+
+  @media (min-width: 768px) {
+    .chamada {
+      font-size: 18px;
+    }
+
+    .chamada-grande {
+      font-size: 19.5px;
+    }
+  }
+
+  /* ── seções e grades ─────────────────────────────────────────────────── */
+  .secao {
+    border-top: 1px solid var(--border);
+    padding-block: 64px;
+  }
+
+  @media (min-width: 768px) {
+    .secao {
+      padding-block: 88px;
+    }
+  }
+
+  .secao-hero {
+    padding-block: 56px 64px;
+  }
+
+  @media (min-width: 768px) {
+    .secao-hero {
+      padding-block: 80px 88px;
+    }
+  }
+
+  .hero-grade,
+  .exemplo-grade,
+  .comeco-grade {
+    display: grid;
+    gap: 40px;
+  }
+
+  @media (min-width: 1000px) {
+    .hero-grade {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+      gap: 56px;
+    }
+
+    .exemplo-grade {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.2fr);
+    }
+
+    .exemplo-grade-invertida {
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr);
+    }
+
+    .comeco-grade {
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+      gap: 48px;
+    }
+  }
+
+  .grade-2,
+  .grade-3,
+  .grade-4,
+  .grade-reprova,
+  .grade-guias {
+    display: grid;
+    gap: 12px;
+  }
+
+  .grade-2 {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  }
+
+  .grade-3 {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    gap: 16px;
+  }
+
+  .grade-4 {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+  }
+
+  .grade-reprova {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: 10px;
+  }
+
+  .grade-guias {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+    gap: 10px;
+  }
+
+  /* ── o hero ──────────────────────────────────────────────────────────── */
+  .subtitulo-hero {
+    margin: 0;
+    font-size: 19px;
+    color: var(--muted-foreground);
+  }
+
+  .texto-hero {
+    margin: 0;
+    max-width: 52ch;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--foreground);
+  }
+
+  @media (min-width: 768px) {
+    .subtitulo-hero {
+      font-size: 22px;
+    }
+
+    .texto-hero {
+      font-size: 18px;
+    }
+  }
+
+  .botao {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-inline: 18px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 500;
+    transition:
+      background-color 120ms ease,
+      border-color 120ms ease,
+      color 120ms ease;
+  }
+
+  .botao-principal {
+    background-color: var(--primary-muted);
+    color: var(--background);
+  }
+
+  .botao-principal:hover {
+    background-color: var(--primary);
+    color: var(--background);
+  }
+
+  .botao-fantasma,
+  .botao-escolha {
+    border: 1px solid var(--border-strong);
+    color: var(--foreground);
+  }
+
+  .botao-fantasma:hover,
+  .botao-escolha:hover {
+    border-color: var(--muted-foreground);
+    color: var(--foreground);
+  }
+
+  .botao-escolha {
+    min-height: 36px;
+    padding-inline: 14px;
+    font-family: var(--font-family-mono);
+    font-size: 13px;
+  }
+
+  /* ── o bloco de comando ──────────────────────────────────────────────── */
+  .bloco-cmd {
+    min-width: 0;
+    background-color: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .bloco-cmd-barra {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 6px 6px 14px;
+    border-bottom: 1px solid var(--border);
+    background-color: var(--surface-elevated);
+    font-family: var(--font-family-mono);
+    font-size: 12px;
+    color: var(--muted-foreground);
+  }
+
+  .bloco-cmd-rotulo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    min-height: 32px;
+  }
+
+  .quadrado-verde,
+  .quadrado-ambar {
+    flex: 0 0 auto;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+  }
+
+  .quadrado-verde {
+    background-color: var(--primary);
+  }
+
+  .quadrado-ambar {
+    background-color: var(--accent-amber);
+  }
+
+  .botao-copiar {
+    min-height: 32px;
+    padding-inline: 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: 5px;
+    background-color: var(--surface);
+    font-family: var(--font-family-mono);
+    font-size: 12px;
+    color: var(--foreground);
+    cursor: pointer;
+    transition: border-color 120ms ease;
+  }
+
+  .botao-copiar:hover {
+    border-color: var(--muted-foreground);
+  }
+
+  .bloco-cmd-codigo {
+    margin: 0;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-family: var(--font-family-mono);
+    font-size: 13px;
+    line-height: 1.75;
+    color: var(--foreground);
+    white-space: pre;
+  }
+
+  .bloco-cmd-compacto {
+    padding: 10px 14px;
+    font-size: 12.5px;
+  }
+
+  /* O prompt do agente é prosa para uma máquina: quebra linha, como prosa. */
+  .bloco-cmd-agente {
+    white-space: pre-wrap;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--muted-foreground);
+  }
+
+  .prompt {
+    user-select: none;
+  }
+
+  .bloco-cmd-saida {
+    margin: 0;
+    padding: 12px 16px;
+    overflow-x: auto;
+    border-top: 1px dashed var(--border-strong);
+    background-color: var(--background);
+    font-family: var(--font-family-mono);
+    font-size: 12.5px;
+    line-height: 1.75;
+    color: var(--muted-foreground);
+    white-space: pre;
+  }
+
+  .bloco-cmd-medicao {
+    padding: 9px 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .medicao {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 16px;
+    margin: 0;
+    font-family: var(--font-family-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--muted-foreground);
+  }
+
+  .medicao a,
+  a.link-rotulo {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+  }
+
+  /* Link dentro de parágrafo: sublinhado. Verde sobre cinza não basta para quem
+     não distingue as duas cores, e o axe reprova link de bloco de texto que só
+     se diferencia pela cor (WCAG 1.4.1). Fora de parágrafo — navegação,
+     cartões —, o link já se separa pela forma. */
+  .texto a,
+  .texto-mudo a,
+  .chamada a {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .codigo-saida {
+    font-family: var(--font-family-mono);
+    font-size: 12px;
+    padding-right: 8px;
+  }
+
+  .codigo-0 {
+    color: var(--primary);
+  }
+
+  .codigo-1 {
+    color: var(--status-alert);
+  }
+
+  /* ── marcas de procedência ───────────────────────────────────────────── */
+  .marca-rascunho,
+  .marca-nota {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-family-mono);
+    font-size: 11.5px;
+    line-height: 1.35;
+    padding: 3px 7px;
+    border-radius: 4px;
+  }
+
+  .marca-rascunho {
+    border: 1px dashed var(--accent-amber-deep);
+    color: var(--accent-amber);
+  }
+
+  .marca-nota {
+    border: 1px dashed var(--muted-foreground);
+    color: var(--muted-foreground);
+  }
+
+  .sublinhado-tracejado {
+    border-bottom: 1px dashed var(--muted-foreground);
+  }
+
+  /* ── cartões ─────────────────────────────────────────────────────────── */
+  .linha-registro {
+    display: block;
+    overflow-x: auto;
+    padding: 10px 12px;
+    background-color: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: var(--font-family-mono);
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--foreground);
+  }
+
+  .linha-comando {
+    border-color: var(--border-strong);
+  }
+
+  .faixa-camada {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px 18px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--foreground);
+  }
+
+  .faixa-camada p {
+    margin: 0;
+  }
+
+  .faixa-produto,
+  .cartao-produto {
+    border-color: var(--accent-amber-line);
+    background-color: var(--surface-produto);
+  }
+
+  .cartao-feito {
+    border-color: var(--primary-line);
+  }
+
+  .cartao-forte {
+    border-color: var(--border-strong);
+  }
+
+  .numero-medio {
+    font-family: var(--font-family-mono);
+    font-size: 40px;
+    line-height: 1;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--accent-amber);
+  }
+
+  .numero-afirmacao {
+    margin: 0;
+    font-family: var(--font-family-mono);
+    font-size: 40px;
+    line-height: 1;
+    font-weight: 400;
+    color: var(--accent-amber);
+  }
+
+  .numero-nivel {
+    font-family: var(--font-family-mono);
+    font-size: 26px;
+    line-height: 1;
+    color: var(--accent-amber);
+  }
+
+  .cartao-destino {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 18px;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-top-color: var(--border-topo);
+    border-radius: 6px;
+    color: var(--foreground);
+    transition: border-color 120ms ease;
+  }
+
+  .cartao-destino:hover {
+    border-color: var(--border-strong);
+    color: var(--foreground);
+  }
+
+  .cartao-destino-rota {
+    font-family: var(--font-family-mono);
+    font-size: 14px;
+    color: var(--primary);
+  }
+
+  .cartao-guia {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px 16px;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--foreground);
+    transition: border-color 120ms ease;
+  }
+
+  .cartao-guia:hover {
+    border-color: var(--border-strong);
+    color: var(--foreground);
+  }
+
+  /* ── os exemplos ─────────────────────────────────────────────────────── */
+  .passos-exemplo {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    min-width: 0;
+  }
+
+  .passos-exemplo li {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .detalhes-exemplo {
+    border-block: 1px solid var(--border);
+    padding-block: 12px;
+  }
+
+  .detalhes-exemplo > summary,
+  .detalhes-cartao > summary {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    color: var(--primary);
+    font-size: 15px;
+  }
+
+  .detalhes-cartao {
+    padding: 14px 18px;
+  }
+
+  .alvo-ancora {
+    scroll-margin-top: 24px;
+  }
+
+  /* ── as páginas de leitura ───────────────────────────────────────────── */
+  .pagina-sumario {
+    display: grid;
+    gap: 32px;
+    padding-block: 40px 80px;
+  }
+
+  @media (min-width: 960px) {
+    .pagina-sumario {
+      grid-template-columns: 220px minmax(0, 1fr);
+      gap: 48px;
+      padding-block: 56px 96px;
+    }
+
+    .pagina-sumario-lado {
+      position: sticky;
+      top: 16px;
+      align-self: start;
+    }
+  }
+
+  .sumario {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    font-size: 14px;
+  }
+
+  .sumario .rotulo-secao {
+    flex-basis: 100%;
+  }
+
+  .sumario a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    color: var(--muted-foreground);
+  }
+
+  .sumario a:hover {
+    color: var(--foreground);
+  }
+
+  @media (min-width: 960px) {
+    .sumario {
+      flex-direction: column;
+      flex-wrap: nowrap;
+    }
+  }
+
+  .pagina-sumario-texto {
+    display: flex;
+    flex-direction: column;
+    gap: 64px;
+    min-width: 0;
+  }
+
+  .bloco-leitura {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+    scroll-margin-top: 24px;
+  }
+
+  .caixa-tracejada {
+    border: 1px dashed var(--border-strong);
+    border-radius: 12px;
+    padding: 22px;
+  }
+
+  .lista-definicao {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr);
+    gap: 6px 12px;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--foreground);
+  }
+
+  .lista-definicao dt {
+    padding-top: 2px;
+    font-family: var(--font-family-mono);
+    font-size: 12px;
+    color: var(--muted-foreground);
+  }
+
+  .lista-definicao dd {
+    margin: 0;
+  }
+
+  .pilula-desligada {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    font-family: var(--font-family-mono);
+    font-size: 12px;
+    color: var(--muted-foreground);
+  }
+
+  /* O interruptor desenhado é só forma: a bolinha à esquerda é "desligado". */
+  .pilula-desligada i {
+    position: relative;
+    display: inline-block;
+    width: 26px;
+    height: 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: 7px;
+  }
+
+  .pilula-desligada i::after {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--muted-foreground);
+  }
+
+  .tabela-rolavel {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .tabela-rolavel table {
+    width: 100%;
+    min-width: 560px;
+    border-collapse: collapse;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .tabela-rolavel th,
+  .tabela-rolavel td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+    color: var(--foreground);
+  }
+
+  .tabela-rolavel th {
+    background-color: var(--surface-elevated);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted-foreground);
+  }
+
+  .tabela-rolavel tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .passos-seis {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: passo;
+  }
+
+  .passos-seis li {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 10px;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--foreground);
+    counter-increment: passo;
+  }
+
+  .passos-seis li::before {
+    content: counter(passo);
+    padding-top: 2px;
+    font-family: var(--font-family-mono);
+    font-size: 13px;
+    color: var(--accent-amber);
+  }
+
+  .lista-contribuicoes,
+  .lista-simples {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding-left: 20px;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--foreground);
+  }
+
+  .lista-contribuicoes {
+    padding-left: 0;
+    list-style: none;
+    gap: 4px;
+  }
+
+  .lista-contribuicoes li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 14px;
+  }
+
+  .lista-contribuicoes a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    font-size: 13.5px;
+  }
+
+  .faixa {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 18px;
+    padding: 12px 16px;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    background-color: var(--surface);
+    font-family: var(--font-family-mono);
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--muted-foreground);
+  }
+
+  .faixa-atrasada {
+    border-color: var(--accent-amber-line);
+    background-color: var(--surface-produto);
+    color: var(--accent-amber);
+  }
+
+  .legenda-estados {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+    margin: 0;
+    font-family: var(--font-family-mono);
+    font-size: 12.5px;
+    color: var(--muted-foreground);
+  }
+
+  .afirmacao {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px 28px;
+    min-width: 0;
+    padding: 22px;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-top-color: var(--border-topo);
+    border-radius: 10px;
+  }
+
+  .afirmacao-atrasada {
+    border-color: var(--accent-amber-line);
+  }
+
+  .afirmacao-texto {
+    display: flex;
+    flex: 1 1 280px;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .afirmacao-comando {
+    display: flex;
+    flex: 1.4 1 340px;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .mostra {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--muted-foreground);
+  }
+
+  .mostra b {
+    font-weight: 500;
+    color: var(--foreground);
+  }
+
+  /* ── os vizinhos ─────────────────────────────────────────────────────── */
+  .vizinhos-cabeca,
+  .vizinho-grade {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 1.35fr) 170px;
+    gap: 20px;
+  }
+
+  .vizinhos-cabeca {
+    padding: 0 20px 10px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-family-mono);
+    font-size: 12px;
+    color: var(--muted-foreground);
+  }
+
+  .vizinho {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 20px;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+
+  .vizinho-celula {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--foreground);
+  }
+
+  .vizinho-celula p {
+    margin: 0;
+  }
+
+  .vizinho-rotulo {
+    display: none;
+    font-family: var(--font-family-mono);
+    font-size: 11px;
+    color: var(--muted-foreground);
+  }
+
+  .vizinho-conecta {
+    padding: 10px 12px;
+    border: 1px solid var(--accent-amber-line);
+    border-radius: 6px;
+    background-color: var(--surface-produto);
+  }
+
+  .vizinho-conecta .vizinho-rotulo {
+    display: block;
+    color: var(--accent-amber);
+  }
+
+  .vizinho-fonte {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 16px;
+    margin: 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-family-mono);
+    font-size: 12px;
+    color: var(--muted-foreground);
+  }
+
+  @media (max-width: 980px) {
+    .vizinhos-cabeca {
+      display: none;
+    }
+
+    .vizinho-grade {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 12px;
+    }
+
+    .vizinho-rotulo {
+      display: block;
+    }
+  }
+
+  /* ── os degraus ──────────────────────────────────────────────────────── */
+  .trilho {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 8px;
+  }
+
+  @media (min-width: 760px) {
+    .trilho {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+  }
+
+  .trilho-degrau {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    padding-top: 10px;
+    border-top: 3px solid var(--border-strong);
+    color: var(--foreground);
+  }
+
+  .trilho-degrau:hover {
+    color: var(--foreground);
+  }
+
+  .trilho-done {
+    border-top-color: var(--primary);
+  }
+
+  .trilho-now {
+    border-top-color: var(--accent-amber);
+  }
+
+  .trilho-blocked {
+    border-top-color: var(--status-alert);
+  }
+
+  .trilho-nome {
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  .degrau {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+    padding: 22px;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-top-color: var(--border-topo);
+    border-radius: 10px;
+    scroll-margin-top: 24px;
+  }
+
+  .degrau-agora {
+    border-color: var(--accent-amber-line);
+    background-color: var(--surface-produto);
+  }
+
+  .degrau-feito {
+    border-color: var(--primary-line);
+  }
+
+  .degrau-corpo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px 28px;
+  }
+
+  .degrau-corpo > div {
+    display: flex;
+    flex: 1 1 260px;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  /* ── o 404 ───────────────────────────────────────────────────────────── */
+  .pagina-404 {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    max-width: 900px;
+    padding-block: 72px 104px;
   }
 }

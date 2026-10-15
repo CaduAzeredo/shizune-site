@@ -1,6 +1,7 @@
 # AGENTS.md — o contrato deste repositório
 
-Este é o site do produto: **`shizune.dev`**, duas rotas e um 404, em inglês. Ele não é o
+Este é o site do produto: **`shizune.dev`**, quatro rotas (`/`, `/method`, `/evidence`,
+`/roadmap`) e um 404, em inglês. Ele não é o
 pacote Shizune — o pacote vive em [`CaduAzeredo/shizune`](https://github.com/CaduAzeredo/shizune),
 tem manifest, CI e `doctor` próprios, e nada daqui entra lá.
 
@@ -12,23 +13,32 @@ repositório ganha** e o dossiê é corrigido.
 
 ## As oito regras que não se renegociam
 
-### 1. Todo número da página é medido, nunca digitado
+### 1. Todo número da página vem da ficha da release, nunca digitado
 
-`src/content/ficha.ts` e `src/content/saida-teste-negativo.txt` são **gerados** por
-`npm run ficha`, que clona o pacote público, faz o checkout da release marcada Latest no
-GitHub e roda os três comandos que a página mostra. Não edite nenhum dos dois à mão.
+`src/content/ficha-release.json` é **cópia byte a byte** do `shizune-release.json` anexado à
+release mais recente do pacote (DEC-026 no Brain: a release é a fonte, os sites são cópias). O
+pacote gera a ficha com `scripts/ficha-release.mjs` num checkout limpo da tag e a confere com
+`--check` (esquema fechado, `sha` igual ao commit da tag, commit com assinatura `G`). Os números,
+as datas, os SHAs, os comandos e a captura do teste negativo saem desse arquivo, por
+`src/content/ficha.ts`. Não edite nenhum dos dois à mão.
 
-Trocar de release é rodar o script e publicar. A tag é **saída** da medição, nunca entrada:
-tag constante dentro do script seria a mesma edição à mão em outro arquivo, só que escondida.
+Quem troca a ficha é a cadeia (um workflow agendado lê a release Latest, roda o `--check` e abre
+um PR em `preview/*` só com `ficha-release.json` e `release-mais-recente.json`), ou
+`npm run ficha -- <arquivo>`, à mão. **Até a 0.5.0 este repositório clonava o pacote e media os
+números aqui; a medição passou para a release**, que é o único lugar onde ela é conferida contra
+a tag. Medir de novo aqui seria ter duas fontes para o mesmo número.
 
-O comando de cada número aparece ao lado dele na página, e roda **a partir do clone público
-na tag, e de nada além disso** — sem caminho local, sem SHA de fronteira, sem árvore que o
-leitor não tenha. O que não se reproduz assim não ganha número na `/`.
+O comando de cada número aparece ao lado dele na página — o mesmo comando que a ficha registrou —,
+e roda **a partir do clone público, e de nada além disso**: sem caminho local, sem SHA de
+fronteira, sem árvore que o leitor não tenha. O que não se reproduz assim não ganha número na
+`/`. A exceção declarada são as contribuições, que rodam contra o GitHub, e a página diz.
 
 ### 2. O bloco de terminal é literal
 
-`saida-teste-negativo.txt` é exatamente o que o comando imprimiu. Ele não se traduz, não se
-encurta e não se embeleza. Confira com `diff` contra uma execução nova; nunca edite.
+A captura (`evidence[negative-test-output].capture` na ficha) é exatamente o que o comando
+imprimiu no commit da tag. Ela não se traduz, não se encurta e não se embeleza. Os exemplos da
+`/` mostram uma SEÇÃO da captura, sem linha cortada dentro dela, e a captura inteira fica no DOM
+logo abaixo.
 
 Cortar linha para caber **é editar**. O que não cabe na dobra recolhe num `<details>`, com o
 texto inteiro no DOM. No celular a saída rola na horizontal em vez de quebrar linha.
@@ -39,11 +49,16 @@ inglês, fora do bloco, é o que serve o leitor de fora.
 
 ### 3. O texto vem do Brain, e não se reescreve no caminho
 
-Fonte: `projects/brain-launch/shizune-dev-texto-e-briefing.md`. Nenhuma frase foi reescrita,
-encurtada ou cortada para caber, e nenhuma deve ser. Se uma frase precisa mudar, ela muda lá
+Fonte, desde a rota das quatro páginas (15/10): as telas do design em
+`projects/brain-launch/design/` — a home v3 (`shizune-design-06-home-v3-en.page.html`) e as telas
+11 a 14 —, conferidas pela verificação de 15/10. Até lá a fonte era
+`projects/brain-launch/shizune-dev-texto-e-briefing.md`. Nenhuma frase foi reescrita, encurtada ou
+cortada para caber, e nenhuma deve ser; as poucas mudanças que a release real exigiu estão
+declaradas no cabeçalho de cada arquivo de conteúdo. Se uma frase precisa mudar, ela muda lá
 primeiro.
 
-O texto vive em `src/content/*.ts`, fora do JSX.
+O texto vive em `src/content/*.ts`, fora do JSX. Os nomes dos seis degraus (`degraus.ts`) só
+mudam por decisão assinada (DEC-025).
 
 ### 4. Cor é elemento, nunca atmosfera
 
@@ -69,12 +84,21 @@ laço · rolagem suave · reação ao cursor ou à rolagem · `keydown` em `docu
 ### 6. Um rodapé, e a marca no formato canônico
 
 Nenhuma página desenha o próprio fecho. O rodapé é global e lê `src/content/rodape-de-rota.ts`;
-rota nova é uma chave num mapa. O lockup `>_ Cadu Azeredo / shizune` aparece no topo e no
-rodapé, e **nunca é reescrito em outra tipografia dentro do conteúdo**.
+rota nova é uma chave num mapa.
 
-O `e2e` conta: um `<footer>`, um `<header>`, um `<main>`, um `<h1>`, o lockup duas vezes, e o
-nome o número de vezes declarado por rota. A contagem existe para que uma repetição nova
-precise de alguém decidindo que ela entra.
+**O topo é o símbolo e o nome do produto** (`shizune`), e o autor assina no rodapé, no lugar
+reservado para a `assinatura-cadu-v2`. O lockup `>_ Cadu Azeredo / shizune` saiu na rota das
+quatro páginas (15/10). PENDENTE: o arquivo da assinatura nova ainda não existe; até lá o lugar
+mostra o nome em texto ("Shizune — by Cadu Azeredo"), **nunca a logo antiga e nunca uma caixa
+tracejada**. O nome nunca é reescrito em outra tipografia dentro do conteúdo.
+
+O rodapé não diz "contributions under DCO" nem cita `SUCCESSION.md`: nenhum dos dois foi
+aprovado, e o pacote não fala de DCO. Entram primeiro no pacote, depois aqui.
+
+O `e2e` conta: um `<footer>`, um `<header>`, um `<main>`, um `<h1>`, o topo com o símbolo e o
+nome do produto, o lockup antigo zero vezes, e o nome o número de vezes declarado por rota (hoje,
+uma: o rodapé). A contagem existe para que uma repetição nova precise de alguém decidindo que
+ela entra.
 
 ### 7. Estar no ar significa que o corpo diz o que devia dizer
 
@@ -88,8 +112,9 @@ com **status 404** de verdade, e não um `200` com cara de erro.
 
 ### 8. Um fato que muda arrasta todas as superfícies que o afirmam — na mesma passada
 
-Os mesmos fatos vivem em mais de um lugar: aqui (`/` e `/method`), no site pessoal
-(`caduazeredo.com/shizune`, `/novidades`, a home e a ficha da Rei) e no Brain. Atualizar um
+Os mesmos fatos vivem em mais de um lugar: aqui (as quatro rotas), no site pessoal
+(`caduazeredo.com/shizune`, `/shizune/evidencia`, `/shizune/roadmap`, `/novidades` e a home) e no
+Brain. A Rei saiu dos sites em 15/10, e com ela a ficha da Rei como superfície. Atualizar um
 lugar por vez é como a `/novidades` ficou uma semana atrás e como um badge de versão sobreviveu
 a uma passada inteira de correção. A regra completa, com o inventário das superfícies, vive no
 Brain em `projects/cadu-azeredo/regra-de-propagacao-entre-superficies.md`; o que este
@@ -97,9 +122,10 @@ repositório precisa saber na hora de mexer:
 
 | Se mudar… | …aqui acompanham | …e fora daqui |
 | :--- | :--- | :--- |
-| **a tag publicada** | `npm run ficha` (a tag é saída, nunca digitada) → `ficha.ts` e a saída do teste negativo → as âncoras de `/` no `e2e` | `versaoPublicada`/`shaPublicado` e o cartão de check runs do site pessoal; badge e JSON-LD da home; a Rei; verbete `lancamento` na `/novidades` |
-| **um número de instância** (decisões N/V/R) | a frase de instância em `method.ts` **e** a data de `MEDIDO_EM_INSTANCIA` → a âncora do rótulo no `e2e` | o cartão "decisões" e `medidoEm`/`shaMedicao` do site pessoal; a faixa da home; a ficha da Rei |
-| **um fato novo** (contribuição, embargo, decisão) | o bloco que o afirma em `method.ts` → âncoras novas no `e2e` | toda página do site pessoal que afirma o fato; verbete datado na `/novidades` **na mesma passada**; a ficha da Rei |
+| **a release publicada** | a cadeia abre o PR com a ficha nova (ou `npm run ficha -- <arquivo>`) → os números, a captura e o estado dos degraus acompanham sozinhos; o `e2e` lê a ficha, então as âncoras também | a mesma ficha no site pessoal (`src/content/ficha-release.json`); o JSON-LD dos dois sites; o verbete na `/novidades`, cujo texto em português o operador assina |
+| **um número medido fora da ficha** (as contribuições, contra o GitHub) | o valor, o comando e a data em `method.ts` | as páginas do site pessoal que mostram as contribuições |
+| **um fato novo** (contribuição aceita, decisão) | o bloco que o afirma em `method.ts` ou `evidencia.ts` → âncoras novas no `e2e` | toda página do site pessoal que afirma o fato; verbete datado na `/novidades` **na mesma passada** |
+| **uma fonte de vizinho conferida** | `fonte` e `lidaEm` em `vizinhos.ts` — e a linha vai ao ar em produção | a mesma linha em `/shizune/evidencia` do site pessoal |
 | **uma trava** | a seção acima **e** `PROIBIDO` no `e2e` **e** os comentários que explicavam a trava antiga (`grep` pela regra antiga em `src/` e `scripts/`) | os mesmos três lugares no site pessoal; `content/README.md` no Brain |
 
 A ordem é sempre: Brain → medir → este site → site pessoal → `/novidades` → Rei → contratos →
@@ -122,11 +148,12 @@ que é, em ordem:
 | `check-contrast` | Descobre todo escopo que declara token e mede cada par declarado. Falha se um token de cor não aparecer em par nenhum |
 | `check-motion` | As nove regras da regra 5, mais a existência da rede global de `prefers-reduced-motion` atingindo `*` |
 | `check-slop` | Hex em `.tsx`, gradiente, blur, emoji, `®`, e o teto de 65% de saturação nos acentos |
+| `test-publicacao` | A regra de publicação: linha sem fonte conferida aparece marcada no preview e some em produção |
 | `typecheck` | `tsc --noEmit` |
 | `lint` | `eslint .` |
 | `build` | `vite build` mais o `404.html` do pós-build |
 | `peso` | Orçamento do primeiro desenho, em gzip, com a folga impressa |
-| `e2e` | As três rotas num Chromium de verdade. O número de verificações ele mesmo imprime — não fica escrito aqui, para não envelhecer em silêncio |
+| `e2e` | As quatro rotas e o 404 num Chromium de verdade. O número de verificações ele mesmo imprime — não fica escrito aqui, para não envelhecer em silêncio |
 
 O `e2e` sobe um servidor local que lê **este** `vercel.json` e aplica os mesmos cabeçalhos,
 a mesma reescrita e o mesmo 404 — inclusive a CSP, o que faz uma violação aparecer no teste
@@ -149,7 +176,15 @@ Nunca, no texto ou na arte — e o `e2e` confere as que dão para conferir mecan
 - preço, tier, "packs", curso, "beta fechado", "rodando em clientes"
 - "governança de agentes" ou "ferramenta de diagnóstico" como categoria — a categoria é
   **auditable decision governance**; "diagnóstico" nomeia a atividade
-- número de versão no corpo — a tag aparece só no comando de clone
+- número de versão no texto visível — **nem no comando de clone**, que resolve a tag sozinho
+  (`git checkout "$(git tag --sort=-v:refname | head -1)"`). A versão vive só no
+  `softwareVersion` do JSON-LD da `/`, lida da ficha, e `seo.ts` é o único arquivo que importa o
+  campo `version`. Depois do build, `grep -rnoE 'v?0\.[0-9]+\.[0-9]+' dist` acha uma ocorrência
+  só, a do JSON-LD. *(Até 15/10 a tag aparecia no comando de clone.)*
+- linha que afirma algo sobre o mundo de fora (um vizinho, uma citação, um número de relatório
+  ainda não medido de novo) sem fonte conferida — no preview ela aparece marcada como rascunho, em
+  produção ela não aparece (`src/lib/publicacao.ts`, testada em `scripts/test-publicacao.mjs` e no
+  `e2e`)
 - exclamação; "save time"; "10x"; número redondo sem comando
 - nome de cliente ou de fornecedor de IA; nome de alvo ou de issue **só das contribuições
   enviadas há mais de 14 dias** (as sete da primeira rodada, públicas desde 2026-09-16 — o

@@ -1,31 +1,47 @@
-import BrandMark from "./brand-mark";
-import { GlifoCompacto } from "./glifo";
-import { rodape } from "@/content/rodape-de-rota";
+import { Link } from "react-router-dom";
+import { NAVEGACAO, rodape } from "@/content/rodape-de-rota";
+import { REPOSITORIO } from "@/content/repositorio";
 
 /**
  * O fecho — um só, em toda rota.
  *
- * Nenhuma página desenha o próprio. Ele lê `rodape` de `rodape-de-rota.ts`; uma
- * rota nova é uma chave num mapa, não um rodapé novo. O `e2e` conta: mais de um
- * `<footer>` na página reprova.
+ * Nenhuma página desenha o próprio. Ele lê `rodape-de-rota.ts`; uma rota nova é
+ * uma chave num mapa, não um rodapé novo. O `e2e` conta: mais de um `<footer>`
+ * na página reprova.
  *
- * O nome completo aparece aqui SEMPRE, inclusive quando o header do celular o
- * esconde — é o lugar onde a assinatura é obrigatória.
+ * A autoria fica aqui, e só aqui: "Shizune by Cadu Azeredo", com o nome do
+ * autor em Newsreader Italic levando a caduazeredo.com na mesma aba — é o site
+ * do mesmo autor, e não um destino de fora.
  */
 export function Footer() {
+  const { produto, por, autor, siteDoAutor } = rodape.autoria;
   return (
     <footer className="border-t border-border">
-      <div className="coluna flex flex-col gap-4 pt-7 pb-9 md:flex-row md:items-center md:justify-between md:gap-6 md:pb-10">
-        <BrandMark segmento={rodape.segmento} />
+      <div className="largura rodape">
+        <div className="rodape-linhas">
+          <p className="credito">
+            {/* Os espaços entre os itens são para o leitor de tela e para quem
+                copia o texto; na tela, quem separa é o `gap`. */}
+            <span>{produto}</span>{" "}
+            <span className="credito-por">{por}</span>{" "}
+            <a href={siteDoAutor} className="credito-autor">
+              {autor}
+            </a>
+          </p>
+          <p>{rodape.licenca}</p>
+          <p>{rodape.marca}</p>
+        </div>
 
-        <span className="inline-flex items-center gap-2.5">
-          <span aria-hidden="true" className="text-accent-amber">
-            <GlifoCompacto tamanho={20} />
-          </span>
-          <span className="text-[13px] text-muted-foreground md:text-[13.5px]">
-            {rodape.fecho}
-          </span>
-        </span>
+        <nav aria-label="Footer" className="rodape-nav">
+          {NAVEGACAO.map((r) => (
+            <Link key={r.caminho} to={r.caminho} className="topo-link">
+              {r.rotulo}
+            </Link>
+          ))}
+          <a href={REPOSITORIO} className="topo-link">
+            github
+          </a>
+        </nav>
       </div>
     </footer>
   );
