@@ -1,235 +1,244 @@
 /**
  * O texto da rota `/method`.
  *
- * Fonte: `projects/brain-launch/shizune-dev-texto-e-briefing.md` no Brain.
- * **Nenhuma frase foi reescrita, encurtada ou cortada no caminho até aqui.**
+ * Fonte: a tela 11 do design (`projects/brain-launch/design/11-method.page.html`
+ * no Brain), conferida pela verificação de 15/10. **Nenhuma frase do design foi
+ * reescrita.** Uma diferença, declarada aqui:
  *
- * Os números desta rota são de outra natureza, e isso está escrito na página:
- * eles vêm de uma instância privada e **não saem de clone nenhum**. Por isso
- * carregam o rótulo "Measured in a private instance, <data>" colado ao número,
- * e por isso não há comando ao lado deles — o comando rodaria numa árvore que
- * o leitor não tem, e um comando que ninguém pode rodar é decoração.
+ * - "Where the method ran" traz as duas contagens do design E, abaixo delas, a
+ *   lista das sete contribuições com link, que vivia nesta rota desde 16/09. A
+ *   regra do operador para contribuição em página é "com link, o estado de cada
+ *   uma, a data da medição e o comando" (16/09) — a contagem sozinha não cumpre
+ *   a parte do link.
  *
- * **Uma exceção, declarada aqui para que este cabeçalho não minta sobre o
- * arquivo (2026-09-16):** o bloco `contribuicoes` tem comando ao lado. Aquelas
- * sete linhas não são de instância — são issues e pull requests públicos no
- * GitHub, e o comando as lista para qualquer pessoa com `gh` autenticado. Elas
- * saem do rótulo de instância pelo mesmo motivo que os outros números entram
- * nele: procedência. Ver o comentário do próprio bloco.
+ * O estado da lista foi relido em 15/10 (ver o bloco `contribuicoes`).
  *
- * PROPAGAÇÃO — este arquivo afirma fatos que também vivem em: `scripts/e2e.mjs`
- * (as âncoras de texto da `/method`, inclusive a data do rótulo), no site
- * pessoal (`src/content/shizune.ts`: cartão "decisões", `medidoEm`,
- * `shaMedicao`, seção das contribuições; `shizune-ficha.ts`: a Rei;
- * `novidades.ts`: o verbete do fato) e no Brain. **Mudou aqui, muda lá na
- * mesma passada** — ver AGENTS.md § 8. Se algum não puder acompanhar, o atraso
- * é declarado, nunca silencioso.
+ * Saíram desta rota, na troca para o design de 15/10 (o texto antigo continua no
+ * histórico do git, e volta se o operador pedir): a história das origens, a
+ * fronteira de autoria, a exigência declarada pela instância, o parágrafo sobre
+ * o modelo de ameaça do Sigstore e a contagem de decisões medida na instância
+ * privada.
+ *
+ * As contagens de contribuição rodam contra o GitHub, e não contra o clone: o
+ * valor, o comando e o dia da medição estão aqui, e a página diz que roda contra
+ * o GitHub. A soma é por `awk`: o design usava `bc`, que não existe em toda
+ * máquina — no Git Bash do Windows não existe, e o comando falhava ali.
+ *
+ * PROPAGAÇÃO — ver AGENTS.md § 8.
  */
 import type { Frase } from "./prosa";
 
-/** Rotulado à mão, de propósito: não sai de clone. Ver o cabeçalho. */
-export const MEDIDO_EM_INSTANCIA = "Measured in a private instance, 2026-09-16:";
-
 export const oQueE = {
-  titulo: "What this is",
+  ancora: "what",
+  rotulo: "/method",
+  titulo: "The method",
   texto:
-    "A thin decision-registry layer on top of git. It records what was decided " +
-    "as numbered lines, and cross-checks that record against what git already knows.",
+    "A thin decision-registry layer on top of git. It records what was decided as numbered " +
+    "lines, and cross-checks that record against what git already knows.",
+  papeis: [
+    { quem: "the machine", verbo: "drafts", resto: " the decision" },
+    { quem: "you", verbo: "sign", resto: " it with your key" },
+    { quem: "the command", verbo: "verifies", resto: " the record against git" },
+  ],
 } as const;
 
-export interface SecaoDeTexto {
-  readonly titulo: string;
-  readonly paragrafos: readonly Frase[];
-  /**
-   * Desenha a parte como painel, com o traçado de conteúdo ao lado do título.
-   *
-   * Vale **só dentro de `origens`**, e só numa parte. São dois painéis na rota,
-   * e o segundo existe para ecoar o primeiro: a ressalva diz o que a assinatura
-   * não prova; "What the project stopped believing" conta o dia em que o
-   * projeto descobriu isso na própria pele. Mesma afirmação, dois registros —
-   * um normativo, um narrativo —, e a mesma superfície é o que liga os dois.
-   *
-   * **Não haverá um terceiro.** Três painéis e três glifos seriam o abuso da
-   * regra de lugares contados que já foi reprovada duas vezes.
-   */
-  readonly painel?: boolean;
-}
-
-export const secoes: readonly SecaoDeTexto[] = [
-  {
-    titulo: "The registry",
-    paragrafos: [
-      [
-        "Each decision is one numbered line — ",
-        { literal: "DEC-NNN" },
-        " — carrying its text, its state, its signer, and the SHA of the commit that approved it.",
-      ],
-      [
-        "A number is assigned once and never reassigned. A decision that is withdrawn " +
-          "or superseded keeps its number; the number is the handle, not the status.",
-      ],
-    ],
-  },
-  {
-    titulo: "The states",
-    paragrafos: [
-      [
-        "A row carries its state in the ",
-        { literal: "Status" },
-        " column. There are two: ",
-        { literal: "rascunho, assinatura pendente" },
-        " — the draft, which exists and does not count — and ",
-        { literal: "vigente" },
-        ", which a signer and a SHA turn it into.",
-      ],
-      /**
-       * O parágrafo abaixo substitui, em 2026-09-09, uma contradição do texto
-       * original: ele dizia "There are two" e, três linhas adiante, "a decision
-       * that is superseded changes its status" — se há dois estados e nenhum é
-       * "superada", a frase não fecha.
-       *
-       * A redação nova foi conferida contra o que o validador FAZ, e não contra
-       * o que se diz que ele faz: `scripts/validate-decisions.mjs:197` testa
-       * `/^rascunho\b/i` no estado, e o ramo seguinte exige assinante e SHA
-       * resolvível para todo o resto. A palavra `vigente` aparece no código
-       * apenas em comentário — o validador não a conhece. Logo "the validator
-       * knows only the draft and the rest" é literal.
-       */
-      [
-        "Superseding is a rule, not a third state. A decision that is superseded " +
-          "is recorded as such in prose, and the validator knows only the draft " +
-          "and the rest. What never changes is the number: it is the handle, not " +
-          "the status.",
-      ],
-    ],
-  },
-];
+export const registro = {
+  ancora: "registry",
+  titulo: "The registry",
+  chamada:
+    "Each decision is one numbered line, DEC-NNN, with its text, its state, its signer and the " +
+    "SHA of the commit that approved it. A number is assigned once and never reused.",
+  rascunho: { rotulo: "a draft · does not count", linha: "DEC-‹NNN› · rascunho, assinatura pendente" },
+  vigente: { rotulo: "signed · counts", linha: "DEC-‹NNN› · vigente · ‹signer› · ‹sha›" },
+  nota: 'Only two states. "Superseded" is a rule in prose, never a state: the old decision keeps its number.',
+} as const;
 
 export const oQueReprova = {
+  ancora: "fails",
   titulo: "What fails",
-  abertura: [
-    "A commit can cite a decision through a ",
-    { literal: "Decision:" },
-    " trailer. The validator reads the trailer in lower case and with surrounding " +
-      "spaces. Three of the failures below need no trailer at all: they are defects " +
-      "in the record itself.",
-  ] as Frase,
-  chamada: "It fails when:",
+  chamada:
+    "Each of these fails the build, and the output says why. Every one is an assertion in the " +
+    "negative test you can run.",
+  marca: "◆ fails",
   casos: [
-    "the commit cites a decision that does not exist in the registry;",
-    "a decision line has no signer;",
-    "a decision's SHA does not resolve to an object in the tree;",
-    "a commit cites a decision that is still a draft;",
-    "a line has neither a signer nor the draft state.",
+    { titulo: "Commit cites DEC-999", texto: "The decision does not exist in the registry." },
+    { titulo: "Decision without a signer", texto: "A row that counts must name who signed it." },
+    { titulo: "Signature SHA does not resolve", texto: "The approving commit is not in the tree." },
+    { titulo: "Decision signed by a machine key", texto: "A key marked maquina signs drafts, never decisions." },
+    { titulo: "Draft cited by a commit", texto: "A draft exists, but nothing may steer a commit until it is signed." },
+    { titulo: "Nivel: N2 in a trailer", texto: "N2 is never declared. It is proven by a signature." },
+    { titulo: "Delegation to a draft", texto: "A delegation must point at a signed decision." },
+    { titulo: "N1 commit without Autorizado-por", texto: "Delegated work must name the delegation it uses." },
   ],
-  fecho:
-    "It does not fail on an example inside a fenced code block. A fabricated SHA " +
-    "used to illustrate the format is documentation, not a decision, and the " +
-    "validator counts it as neither.",
+  rotuloDoComando: "terminal · clean clone, latest release",
 } as const;
 
-export const fronteira: SecaoDeTexto = {
-  titulo: "The authorship frontier",
-  paragrafos: [
-    [
-      "The registry can declare an authorship frontier. After that point, a commit " +
-        "without a signature from a trusted key fails, and the run says so in those " +
-        "terms — the failure is explained by the frontier, and the verification " +
-        "environment is printed alongside it.",
-    ],
-    [
-      "Outside frontier mode, a commit without a key is reported as a warning. " +
-        "It does not fail the run.",
-    ],
+export const niveis = {
+  ancora: "levels",
+  titulo: "Levels and delegation",
+  chamada:
+    "Not every choice needs a signed row. The levels say who may decide a class of thing, and " +
+    "what trace it leaves. N0 and N1 exist only inside a delegation, and the delegation is " +
+    "itself a signed N2 decision.",
+  lista: [
+    {
+      nivel: "N0",
+      nome: "Micro",
+      exemplo: "formatting, a local rename, picking among options already allowed",
+      quem: "the agent, or a fixed rule",
+      rastro: "none per item; only the delegation",
+      humano: false,
+    },
+    {
+      nivel: "N1",
+      nome: "Machine",
+      exemplo: "a library from an approved list; an existing policy on a new case",
+      quem: "the agent, with its machine key",
+      rastro: "a commit on a draft branch, with the level trailer",
+      humano: false,
+    },
+    {
+      nivel: "N2",
+      nome: "Human",
+      exemplo: "architecture, data, money, a rule that becomes code, anything irreversible",
+      quem: "the owner",
+      rastro: "a signed row in the registry",
+      humano: true,
+    },
   ],
-};
+  rotulos: { exemplo: "example", quem: "who decides", rastro: "trace" },
+  arquivo: {
+    rotulo: "governance/delegacoes.txt · one line per class",
+    linha: "delega N1 approved-dependencies autorizado_por DEC-NNN",
+  },
+  commit: { rotulo: "the commit that uses it", linha: "Nivel: N1\nAutorizado-por: DEC-NNN" },
+  nota:
+    "Without the file nothing changes, and the summary says no delegation is declared. Expiry " +
+    "dates and quorum are not part of this step.",
+} as const;
 
-export const exigencia: SecaoDeTexto = {
-  titulo: "The instance declares the requirement",
-  paragrafos: [
-    [
-      "Shizune ships no trust list of its own. An instance declares, in a file, that " +
-        "signing a decision requires a trusted key. The same citation that passes " +
-        "without that declaration fails with it.",
-    ],
-    [
-      "When it fails, the run states that the requirement came from the instance and " +
-        "not from the framework, and prints the commit's ",
-      { literal: "%G?" },
-      " code. A declared requirement the validator does not recognise is itself a " +
-        "failure — an unknown token does not pass silently.",
-    ],
+export const garantia = {
+  ancora: "backing",
+  titulo: "What backs a decision",
+  chamada:
+    "For every signed row the validator works out what backs it from git, and never takes it " +
+    "from the table. A field a person fills in can lie; one derived from git cannot.",
+  tipos: [
+    { nome: "chave", texto: "A good signature from the signer’s declared human key." },
+    { nome: "plataforma", texto: "A merge accepted by the platform route below. Weaker than a key." },
+    { nome: "nenhuma", texto: "Nothing backs it. The summary counts it." },
   ],
-};
+  rotuloDoComando: "terminal · for scripts",
+  comando: "bun scripts/validate-decisions.mjs --json",
+  saida: '{ "id": "DEC-‹NNN›", "garantia": "chave", "sha": "‹sha›" }',
+} as const;
 
-/**
- * A ressalva. É a seção mais longa e a mais importante da rota, e a única que
- * ganha painel próprio — sem borda colorida à esquerda, que é tique de página
- * gerada. Ela existe para dizer o que a assinatura NÃO prova, e o site inteiro
- * depende de ela estar ali.
- */
-export const ressalva = {
+export const merge = {
+  ancora: "merge",
+  titulo: "Merge as a signature",
+  desligado: "off by default",
+  chamada:
+    "An optional route. A merge commit created by GitHub can count as the named signer’s " +
+    "decision, but only where your instance declares it, and only after you measure that your " +
+    "agent cannot press the same button.",
+  cabecas: ["A platform merge counts only if", "Why"],
+  condicoes: [
+    { se: ["it has two parents"], porque: "squash and rebase leave one parent and an editable message" },
+    { se: ["it verifies as ", { literal: "G" }, " against the platform key"], porque: "the key is imported and trusted, never assumed" },
+    { se: ["its author is the declared email"], porque: "the account that pressed merge" },
+    { se: ["that author is a person, not an app"], porque: "an app is a machine" },
+    { se: ["that person wrote none of the pull request’s commits"], porque: "nobody approves their own work" },
+  ] as ReadonlyArray<{ readonly se: Frase; readonly porque: string }>,
+  porQueDesligado: {
+    titulo: "Why it is off: our own measurement said no",
+    texto:
+      "On 2026-10-14, in a public test repository, the agent’s cloud credential turned out to be " +
+      "the operator’s own account, with admin rights and a bypass for pull requests. A merge by " +
+      "the agent would have been indistinguishable from a merge by the operator. So the " +
+      "directive stays off in our instance.",
+    rotuloDoComando: "terminal · run with the agent’s credential, never yours",
+    comandos: [
+      "gh api user --jq '.login, .type'",
+      "gh api repos/OWNER/REPO --jq '.permissions'",
+      "gh api repos/OWNER/REPO/rulesets/RULESET_ID --jq '.current_user_can_bypass'",
+      "gh api -X PUT repos/OWNER/REPO/pulls/9999/merge",
+    ],
+    resultado: "◆ 2026-10-14: the agent could merge",
+    consequencia: "route stays off",
+  },
+  plano:
+    "On a private repository, branch rulesets need a paid GitHub plan. On the free plan, " +
+    "creating one returns 403.",
+} as const;
+
+export const assinatura = {
+  ancora: "signature",
   titulo: "What a signature does and does not show",
-  paragrafos: [
-    "A verified commit shows that a trusted key signed it. It does not show that a " +
-      "particular human wrote the content, and it is not evidence of authorship.",
-    "The three layers do not replace one another. The watermark says what the machine " +
-      "wrote. The key says who pushed. The registry says what the human decided.",
+  mostra: {
+    rotulo: "● shows",
+    texto:
+      "Which key signed. That the signer named in the row matches the key’s principal. That a " +
+      "machine key did not sign a decision.",
+  },
+  naoMostra: {
+    rotulo: "◆ does not show",
+    texto:
+      "Who wrote the content. That the decision is good. Any saving in time, tokens or money: " +
+      "none is measured, so none is claimed.",
+  },
+} as const;
+
+/** As âncoras são as que o GitHub gera dos títulos do QUICKSTART do pacote. */
+export const guias = {
+  ancora: "guides",
+  titulo: "Guides",
+  chamada: "Each one lives in the quickstart, in the repository, next to the commands it uses.",
+  lista: [
+    { titulo: "Adopting it in a repository that already exists", secao: "QUICKSTART §2b →", ancora: "2b-adopting-shizune-in-a-repository-that-already-exists" },
+    { titulo: "More than one person", secao: "QUICKSTART §6 →", ancora: "more-than-one-person" },
+    { titulo: "Squash, rebase, and the two things that break", secao: "QUICKSTART §6 →", ancora: "squash-rebase-and-the-two-things-that-break" },
+    { titulo: "Delegating small decisions: N0 and N1", secao: "QUICKSTART §6 →", ancora: "delegating-small-decisions-levels-n0-and-n1" },
+    { titulo: "Giving an agent its own key", secao: "QUICKSTART §6 →", ancora: "giving-an-agent-its-own-key" },
+    { titulo: "If a key leaks", secao: "QUICKSTART §6 →", ancora: "if-a-key-leaks" },
+    { titulo: "A merged pull request as a signature", secao: "QUICKSTART §6 →", ancora: "a-merged-pull-request-as-a-signature-off-by-default" },
   ],
-  adjacente:
-    "Adjacent projects draw the same line. Sigstore's threat model separates a " +
-    "signature coming from a controlled identity from the question of whether that " +
-    "identity should be trusted — the signature is evidence about a key, and trust " +
-    "is a policy you still have to state.",
-  instancia: [
-    { rotulo: MEDIDO_EM_INSTANCIA },
-    " the instance's own key has required a passphrase since 2026-09-06. That is a " +
-      "fact about one instance's configuration, not a property of the tool.",
-  ] as Frase,
+  chaveVazada: {
+    resumo: "▸ If a key leaks: the six steps",
+    passos: [
+      "Take the key off the trust list, in a commit signed by another human key.",
+      "Mark the cut-off date on the line, so earlier history stays verifiable.",
+      "List what the key signed after the probable exposure.",
+      "Re-sign each decision that still holds; revoke the rest with a new decision.",
+      "Rotate the neighbouring credentials: the agent’s, the CI’s, the platform’s.",
+      "Record the incident as a dated decision.",
+    ],
+  },
 } as const;
 
-export const testeNegativo = {
-  titulo: "The negative test",
+export const formato = {
+  ancora: "format",
+  titulo: "The format",
+  marca: "se aprovado · especificação v0",
   texto:
-    "The validator's behaviour is proven by a test that constructs records which must " +
-    "be rejected, asserts the rejection, and then reports a passing run. It also " +
-    "guards its own instruments: that the trailer extractor actually extracted, that " +
-    "a text with no trailer counts zero citations, that a summary line does not " +
-    "report success when the result was a failure.",
-} as const;
-
-export const entrega = {
-  titulo: "What the method delivers",
-  texto:
-    "A numbered record of decisions with a handle that never moves; a cross-check " +
-    "between what is written and what the tree contains; a trust boundary declared " +
-    "by the instance rather than assumed by the tool; and a validator whose refusals " +
-    "are themselves tested.",
-  instancia: [
-    { rotulo: MEDIDO_EM_INSTANCIA },
-    " 20 decisions, of which 15 are current and 5 are drafts.",
-  ] as Frase,
+    "A short specification of the registry format, separate from the tool, so another " +
+    "implementation can read the same file. Draws here only after the proposal is signed.",
 } as const;
 
 /**
- * As contribuições da primeira rodada — o único bloco desta rota com comando ao
- * lado, e a exceção está declarada no cabeçalho do arquivo.
+ * As contribuições — o único bloco desta rota que roda contra o GitHub.
  *
- * Estes números NÃO são de instância: são sete issues e pull requests públicos
- * no GitHub, e o comando abaixo os lista para qualquer pessoa com `gh`
- * autenticado. Por isso saem do rótulo "Measured in a private instance" — até
- * 2026-09-16 a frase "Seven contributions sent to third-party repositories, two
- * accepted" vivia dentro dele, sem nome e sem link, porque os alvos estavam
- * sob embargo de divulgação responsável. O embargo venceu em 2026-09-15.
+ * As duas contagens foram medidas em 2026-10-15, com os dois comandos abaixo, e o
+ * estado de cada linha da lista foi relido no mesmo dia (uma busca por
+ * repositório, a mesma do comando). `estado` é fato do dia da medição, não
+ * propriedade da contribuição, e por isso a lista carrega a própria data. O que
+ * mudou desde 16/09: a issue do cognee foi fechada como concluída em 2026-10-04 —
+ * é ela que faz as aceitas serem 3, e não 2.
  *
- * **Nenhuma contagem de achados aqui** — nem por alvo, nem agregada. Decisão do
- * operador em 2026-09-16: o total anunciaria defeitos encontrados e não
- * contados aos mantenedores, e numa página de produto a pergunta fica sem
- * resposta. O total vive no relatório escrito. A evidência aqui são os links.
- *
- * Quem editar isto: rode o comando e confira o estado de cada linha. `estado` é
- * fato do dia da medição, não propriedade da contribuição.
+ * **Nenhuma contagem de achados aqui** — nem por alvo, nem agregada (decisão do
+ * operador em 2026-09-16). A evidência são os links.
  */
+const REPOS = "rohitg00/agentmemory mem0ai/mem0 topoteretes/cognee TeleAI-UAGI/Awesome-Agent-Memory";
+
 export interface Contribuicao {
   readonly repo: string;
   readonly numero: number;
@@ -239,291 +248,43 @@ export interface Contribuicao {
 }
 
 export const contribuicoes = {
-  titulo: "Contributions to third-party repositories",
-  texto:
-    "The method was first run against four public repositories, on 2026-09-01. " +
-    "Seven contributions were sent — six issues and one pull request — and two " +
-    "were accepted by the maintainers. Every one is public on GitHub; the " +
-    "command below reproduces the list.",
-  medidoEm: "State as of 2026-09-16.",
-  comando:
-    "for r in rohitg00/agentmemory mem0ai/mem0 topoteretes/cognee TeleAI-UAGI/Awesome-Agent-Memory; do\n" +
-    '  gh api "search/issues?q=repo:$r+author:CaduAzeredo" \\\n' +
-    "    --jq '.items[] | \"\\(.number)\\t\\(.state)\\t\\(.title)\"'\n" +
-    "done",
-  itens: [
-    {
-      repo: "TeleAI-UAGI/Awesome-Agent-Memory",
-      numero: 98,
-      tipo: "pull request",
-      estado: "merged 2026-09-01",
-      url: "https://github.com/TeleAI-UAGI/Awesome-Agent-Memory/pull/98",
-    },
-    {
-      repo: "TeleAI-UAGI/Awesome-Agent-Memory",
-      numero: 100,
-      tipo: "issue",
-      estado: "closed as completed 2026-09-03",
-      url: "https://github.com/TeleAI-UAGI/Awesome-Agent-Memory/issues/100",
-    },
-    {
-      repo: "mem0ai/mem0",
-      numero: 7202,
-      tipo: "issue",
-      estado: "open",
-      url: "https://github.com/mem0ai/mem0/issues/7202",
-    },
-    {
-      repo: "topoteretes/cognee",
-      numero: 4865,
-      tipo: "issue",
-      estado: "open",
-      url: "https://github.com/topoteretes/cognee/issues/4865",
-    },
-    {
-      repo: "rohitg00/agentmemory",
-      numero: 1313,
-      tipo: "issue",
-      estado: "open",
-      url: "https://github.com/rohitg00/agentmemory/issues/1313",
-    },
-    {
-      repo: "rohitg00/agentmemory",
-      numero: 1314,
-      tipo: "issue",
-      estado: "open",
-      url: "https://github.com/rohitg00/agentmemory/issues/1314",
-    },
-    {
-      repo: "rohitg00/agentmemory",
-      numero: 1315,
-      tipo: "issue",
-      estado: "open",
-      url: "https://github.com/rohitg00/agentmemory/issues/1315",
-    },
-  ] as readonly Contribuicao[],
-} as const;
-
-/**
- * A história — a última seção de CONTEÚDO da rota.
- *
- * Escrita pelo revisor em 2026-09-09 a partir do levantamento do executor, e
- * entra com quatro mudanças, todas ratificadas pelo operador no mesmo dia:
- *
- * 1. **"the next day"**, e não "two days later": a DEC-014 (nome) é de 02/09 e
- *    o ADR-044 (marca) é de 03/09 — um dia. O erro nasceu na prosa do
- *    levantamento, cuja tabela trazia as duas datas certas.
- * 2. **"one major model provider"**, e não "a large language model": foi um
- *    fornecedor, não a indústria. Continua sem nome, pelo ADR-035.
- * 3. **"Measured on 2026-09-01"** colado às 240 mil estrelas — contagem de
- *    estrela muda todo dia, e o número não pode depender do antecedente da
- *    frase anterior.
- * 4. **"measured on that machine"** colado aos 36 ms — é o tempo naquela
- *    máquina, não uma propriedade da assinatura. É a diferença entre medição e
- *    alegação.
- *
- * Cada marco tem data e está ancorado num ADR ou numa DEC. A origem é relato do
- * operador, rotulado como tal na própria seção, porque não existe em documento
- * versionado — e é esse fato que abre a história.
- *
- * FICA DE FORA, de propósito: o material de neurociência que o repositório
- * classifica como baixa evidência; nome de repositório de terceiro, de cliente
- * ou de fornecedor de IA; e qualquer afirmação de que assinatura prova autoria
- * humana. A frase sobre acreditar nisso está no passado e é desmentida na mesma
- * frase — é o ponto da seção, não um deslize.
- */
-export const origens = {
-  titulo: "Origins",
-  partes: [
-    {
-      titulo: "It started as the opposite of what it is",
-      paragrafos: [
-        [
-          "Shizune began as a memory problem. The operator wanted an assistant that " +
-            "could be spoken to and would act — and, underneath it, somewhere to keep " +
-            "what he could not hold in his head. His own words: he wanted to store " +
-            "things because his memory is bad.",
-        ],
-        [
-          "Two projects needed to stay in sync. Notes accumulated across tools that " +
-            "did not talk to each other. The question being asked was: how does the " +
-            "machine remember?",
-        ],
-        [
-          "What came out answers the opposite question: how does a human prove what " +
-            "they decided? Not a store that remembers for you — a record that counts " +
-            "only once you sign it.",
-        ],
-        [
-          "There is a detail worth admitting here. This project exists to record " +
-            "decisions, and the decision that started it is the only one with no " +
-            "record. The first architecture decision, dated 2026-08-25, names the " +
-            "repository and states its purpose; it does not say why the name was " +
-            "chosen, and nothing written down explains the intent behind it. The " +
-            "account above is the operator's, from memory, recorded here as that and " +
-            "nothing more.",
-        ],
-      ],
-    },
-    {
-      titulo: "The record came before the history",
-      paragrafos: [
-        [
-          "For two days the project deliberately had no version control — a written " +
-            "decision, ADR-004, postponed it. Documents were being kept before commits " +
-            "were. On 2026-08-27, ADR-017 reversed that, and the first commit landed " +
-            "two days after the first decision.",
-        ],
-        ["The order is backwards from the intuitive one, and it is documented."],
-      ],
-    },
-    {
-      titulo: "The question that turned it into a product",
-      paragrafos: [
-        [
-          "On 2026-08-02, one major model provider began watermarking the text its " +
-            "models generate. That answered a question — which tool touched this text " +
-            "— and the source itself was explicit that it could not answer a different " +
-            "one: a watermark can indicate a model was likely involved at some point, " +
-            "and no more.",
-        ],
-        [
-          "On 2026-09-01, that gap became the axis of the project. The watermark says " +
-            "what the machine wrote. The key says who pushed. Nobody was recording " +
-            "what the human decided.",
-        ],
-        [
-          { rotulo: "Measured on 2026-09-01:" },
-          " the three largest projects in the scaffolding layer carried more than " +
-            "240,000 stars between them, and none treated a decision as something that " +
-            "could be required. The scaffold stopped being the product and became a " +
-            "commodity. If this project has a single turning point, it is that one.",
-        ],
-      ],
-    },
-    {
-      titulo: "The record, then the validator",
-      paragrafos: [
-        [
-          "The numbered DEC-NNN record was fixed on 2026-09-01 and entered version " +
-            "control the next day. The validator and its negative test were born in " +
-            "the same commit — the test is not an afterthought to the tool; they are " +
-            "the same age.",
-        ],
-        [
-          "The draft state arrived with it, to settle a problem the record creates for " +
-            "itself: a decision is signed by a SHA that does not exist until the " +
-            "decision is signed. So the machine drafts, the human signs, and the SHA " +
-            "activates.",
-        ],
-        [
-          "The authorship frontier followed on 2026-09-02, and on 2026-09-05 the rule " +
-            "that a trusted key is required to sign — declared by the instance, never " +
-            "by the script.",
-        ],
-      ],
-    },
-    {
-      titulo: "The name",
-      paragrafos: [
-        [
-          "The product was called something else first. On 2026-09-01 a candidate name " +
-            "was rejected at the availability gate: the .dev domain was taken by a " +
-            "product in the same category, which a suffix does not fix. That rejection " +
-            "produced a rule — availability is checked before a name is proposed, " +
-            "never after one is chosen.",
-        ],
-        [
-          "Shizune (静音, quiet sound) cleared the gate on 2026-09-02. The brand " +
-            "followed the next day, and the gap is the point: the old naming decision " +
-            "was still in force, and applying a new name to the package while an older " +
-            "decision fixed the old one would have made the repository claim two " +
-            "brands at once. The decision comes first.",
-        ],
-      ],
-    },
-    {
-      titulo: "What the project stopped believing",
-      painel: true,
-      paragrafos: [
-        [
-          "This is the part worth reading closely, because it is where the caveat " +
-            "above comes from.",
-        ],
-        [
-          "For a time, this project believed that a commit signed with a key proved a " +
-            "human was present. On 2026-09-04, that was tested and found false: the " +
-            "private key had no passphrase, so any process running as the user — " +
-            "including an agent session — could sign in 36 milliseconds with no prompt, ",
-          { rotulo: "measured on that machine" },
-          ". A decision that had been treated as signed was reverted to draft, and the " +
-            'commit that "signed" it was declared invalid as a signature.',
-        ],
-        [
-          "Two days later, four earlier decisions were re-signed, because their " +
-            "original signatures were commits carrying no key at all. The defect was " +
-            "written into each line rather than corrected quietly.",
-        ],
-        [
-          "And in September, a two-day diagnosis reached the wrong cause because the " +
-            "method failed before the diagnosis did: for two days, a status code was " +
-            "being read instead of the body of the response. The rule that came out of " +
-            "it — check the string in the body, never the status alone — is now " +
-            "enforced by the tests of this very site.",
-        ],
-        [
-          "None of that is incidental. A tool that claims to verify has to survive " +
-            "being verified, and each of those was found by running a command, not by " +
-            "reading carefully.",
-        ],
-      ],
-    },
-    {
-      titulo: "Where the study came from",
-      paragrafos: [
-        [
-          "The ADR format comes from Michael Nygard's 2011 note on documenting " +
-            "architecture decisions — the foundation the rest is built on. The working " +
-            "pipeline was shaped by published material on agent engineering; the skill " +
-            "format follows the documented specification. Documentation structure " +
-            "follows Diátaxis; commits follow Conventional Commits; the changelog " +
-            "follows Keep a Changelog; versions follow SemVer.",
-        ],
-        ["The full reference list ships with the package."],
-      ],
-    },
-    {
-      titulo: "Still open",
-      paragrafos: [
-        [
-          "The signing mechanism is a written open question: SSH, GPG, or something " +
-            "built on an existing transparency system. It is recorded as open rather " +
-            "than settled.",
-        ],
-      ],
-    },
-  ] as readonly SecaoDeTexto[],
-} as const;
-
-/**
- * A seção não tem assinatura própria, e a ausência é deliberada.
- *
- * O texto final da rota, como o revisor o escreveu, fechava com a linha
- * "Shizune — by Cadu Azeredo". O rodapé global diz a mesma coisa sessenta
- * pixels abaixo, e a forma composta aparecia duas vezes seguidas na mesma tela
- * — que é exatamente o vício que a regra do rodapé único existe para impedir.
- *
- * Decisão do operador, 2026-09-09, depois que o portão contou quatro marcas
- * nesta rota e três nas outras: **a linha do texto sai, o rodapé global fica.**
- * A colisão foi erro do revisor ao escrever o texto, e a regra do rodapé único
- * ganha. Não recoloque a linha aqui: quem assina a página é o rodapé.
- */
-export const licenca = {
-  titulo: "License and name",
-  texto: [
-    "Apache-2.0. Shizune™. The licence covers the code and does not license the name " +
-      "— the repository's ",
-    { literal: "README.md" },
-    " states the naming policy under “Trademark and naming”.",
-  ] as Frase,
+  ancora: "contrib",
+  titulo: "Where the method ran",
+  chamada:
+    "The method was pointed at four public agent-memory repositories. Each number below is " +
+    "printed by the command next to it, not typed on this page.",
+  medidoEm: "2026-10-15",
+  rotuloDoComando: "terminal · runs against GitHub, needs gh signed in",
+  abertas: {
+    valor: 7,
+    texto: [
+      { forte: "Issues and pull requests opened by CaduAzeredo" },
+      " in the four repositories, open or closed.",
+    ] as Frase,
+    comando: `for r in ${REPOS}; do gh api "search/issues?q=repo:$r+author:CaduAzeredo" --jq '.total_count'; done | awk '{s+=$1} END {print s}'`,
+  },
+  aceitas: {
+    valor: 3,
+    texto: [
+      { forte: "Of those, accepted:" },
+      " pull requests merged, plus issues the maintainer closed as completed.",
+    ] as Frase,
+    comando: `for r in ${REPOS}; do for q in 'is:pr+is:merged' 'is:issue+reason:completed'; do gh api "search/issues?q=repo:$r+author:CaduAzeredo+$q" --jq '.total_count'; done; done | awk '{s+=$1} END {print s}'`,
+  },
+  nota:
+    "Not the same count as the evidence notebook’s “findings resolved by third parties”: that " +
+    "one counts findings, these count contributions. Each label says which.",
+  lista: {
+    titulo: "Every one is public, with a link",
+    estadoEm: "State as of 2026-10-15.",
+    itens: [
+      { repo: "TeleAI-UAGI/Awesome-Agent-Memory", numero: 98, tipo: "pull request", estado: "merged 2026-09-01", url: "https://github.com/TeleAI-UAGI/Awesome-Agent-Memory/pull/98" },
+      { repo: "TeleAI-UAGI/Awesome-Agent-Memory", numero: 100, tipo: "issue", estado: "closed as completed 2026-09-03", url: "https://github.com/TeleAI-UAGI/Awesome-Agent-Memory/issues/100" },
+      { repo: "mem0ai/mem0", numero: 7202, tipo: "issue", estado: "open", url: "https://github.com/mem0ai/mem0/issues/7202" },
+      { repo: "topoteretes/cognee", numero: 4865, tipo: "issue", estado: "closed as completed 2026-10-04", url: "https://github.com/topoteretes/cognee/issues/4865" },
+      { repo: "rohitg00/agentmemory", numero: 1313, tipo: "issue", estado: "open", url: "https://github.com/rohitg00/agentmemory/issues/1313" },
+      { repo: "rohitg00/agentmemory", numero: 1314, tipo: "issue", estado: "open", url: "https://github.com/rohitg00/agentmemory/issues/1314" },
+      { repo: "rohitg00/agentmemory", numero: 1315, tipo: "issue", estado: "open", url: "https://github.com/rohitg00/agentmemory/issues/1315" },
+    ] as readonly Contribuicao[],
+  },
 } as const;

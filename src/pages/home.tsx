@@ -1,191 +1,399 @@
 import { Link } from "react-router-dom";
 import useSeo from "@/lib/use-seo";
 import { seoHome } from "@/content/seo";
-import ficha from "@/content/ficha";
+import ficha, { comandoDe, estadoDe, medicaoDe } from "@/content/ficha";
 import {
   comeco,
   comoFunciona,
+  configurar,
+  contraNos,
+  exemplo01,
+  exemplo02,
   hero,
   numeros,
-  numerosMedidos,
-  problema,
-  prova,
+  ondeSeguir,
 } from "@/content/home";
-import { GlifoCompacto, GlifoConteudo } from "@/components/layout/glifo";
+import { CHECKOUT_DA_ULTIMA, CLONE, REPOSITORIO, secaoDoQuickstart } from "@/content/repositorio";
+import { GlifoCompacto } from "@/components/layout/glifo";
 import BlocoDeComando from "@/components/ui/bloco-de-comando";
-import BlocoDeSaida from "@/components/ui/bloco-de-saida";
-import BlocoDeTerminal from "@/components/ui/bloco-de-terminal";
+import BlocoDeTerminal, { QuadroDaCaptura } from "@/components/ui/bloco-de-terminal";
+import { MarcaRascunho } from "@/components/ui/marca";
+import Medicao from "@/components/ui/medicao";
 import Prosa from "@/components/ui/prosa";
+import { PUBLICACAO } from "@/lib/ambiente";
+import { blocoAparece } from "@/lib/publicacao";
+import { trechoDaSecao } from "@/lib/terminal";
+import { cn } from "@/lib/utils";
 
 /**
- * A rota `/`.
+ * A rota `/` — a home v3.
  *
- * A ordem é a do dossiê, e ela é o argumento: a frase, o problema em três
- * linhas, **a prova**, como funciona, os números, o começo. Nada antes da
- * prova — sem logo de "trusted by", sem frase de venda, sem hero decorativo
- * empurrando o terminal para baixo da dobra.
+ * A ordem é a do design, e ela é o argumento: a frase e, ao lado, como começar;
+ * as três partes; dois exemplos com a saída real do validador; os números com o
+ * comando de cada um; os três comandos do começo; para onde seguir.
+ *
+ * Toda captura e todo número saem da ficha da release. A saída dos exemplos é
+ * uma SEÇÃO da captura, sem linha cortada, e a captura inteira fica no DOM
+ * dentro do primeiro exemplo.
  */
+function CabecaDeSecao({
+  rotulo,
+  titulo,
+  chamada,
+}: {
+  readonly rotulo: string;
+  readonly titulo: string;
+  readonly chamada?: string;
+}) {
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="rotulo-secao">{rotulo}</p>
+      <h2 className="titulo-2">{titulo}</h2>
+      {chamada && <p className="chamada">{chamada}</p>}
+    </div>
+  );
+}
+
 export function Home() {
   useSeo(seoHome);
+  const medidaDaCaptura = medicaoDe("negative-test-output");
+  const rodapeDaCaptura = (
+    <Medicao estado={estadoDe("negative-test-output")} data={medidaDaCaptura.data} sha={medidaDaCaptura.shaCurto} extra={<span>unedited capture</span>} />
+  );
 
   return (
     <>
-      {/* ── hero ──────────────────────────────────────────────────────── */}
-      <section className="coluna pt-15 pb-13 md:pt-24 md:pb-19">
-        {/* O símbolo colapsa uma vez, na entrada: a onda oscila a largura
-            inteira e vira a reta. Âncora silenciosa, não ilustração — por isso
-            nada em volta dele. */}
-        <span
-          aria-hidden="true"
-          className="glifo-hero entra d1 mb-6.5 block text-accent-amber md:mb-8.5"
-        >
-          <span className="md:hidden">
-            <GlifoCompacto tamanho={64} animavel />
-          </span>
-          <span className="hidden md:block">
-            <GlifoCompacto tamanho={96} animavel />
-          </span>
-        </span>
-
-        <h1 className="frase-hero entra d2">
-          {hero.linhas.map((l, i) => (
-            <span key={i}>
-              {i > 0 && <br />}
-              {l.sujeito}
-              <b>{l.verbo}</b>
+      {/* ── a frase, e como começar ───────────────────────────────────── */}
+      <section className="largura secao-hero">
+        <div className="hero-grade">
+          <div className="flex min-w-0 flex-col gap-6">
+            {/* O símbolo colapsa uma vez, na entrada: a onda oscila a largura
+                inteira e vira a reta. Âncora silenciosa, não ilustração. */}
+            <span aria-hidden="true" className="glifo-hero entra d1 block text-accent-amber">
+              <GlifoCompacto tamanho={56} animavel />
             </span>
-          ))}
-        </h1>
 
-        <p className="texto-mudo entra d3 mt-5.5 text-[16px] md:mt-7.5 md:text-[17px]">
-          {hero.subtitulo}
-        </p>
-      </section>
+            <h1 className="frase-hero entra d2">
+              {hero.linhas.map((l, i) => (
+                <span key={i}>
+                  {i > 0 && <br />}
+                  {l.sujeito}
+                  <b>{l.verbo}</b>
+                </span>
+              ))}
+            </h1>
 
-      <hr className="h-px border-0 bg-border" />
+            <p className="subtitulo-hero entra d3">{hero.subtitulo}</p>
+            <p className="texto-hero entra d3">{hero.texto}</p>
 
-      {/* ── o problema, em três linhas ────────────────────────────────── */}
-      <section className="coluna py-10 md:py-13">
-        <div className="entra d4 flex flex-col gap-2.5">
-          {problema.linhas.map((linha) => (
-            <p
-              key={linha}
-              className="text-[17px] leading-[1.5] text-foreground md:text-[19px]"
-            >
-              {linha}
-            </p>
-          ))}
-        </div>
-      </section>
-
-      <hr className="h-px border-0 bg-border" />
-
-      {/* ── a prova ───────────────────────────────────────────────────── */}
-      <section className="coluna pt-14 pb-15 md:pt-19 md:pb-20">
-        <h2 className="titulo-secao">{prova.titulo}</h2>
-        <p className="texto-mudo mb-6">{prova.legenda}</p>
-
-        <BlocoDeComando className="mb-4.5">{prova.comando(ficha)}</BlocoDeComando>
-
-        <BlocoDeTerminal saida={ficha.saidaTesteNegativo} />
-
-        <p className="texto-mudo mt-5 text-[13.5px] md:text-[14.5px]">
-          <Prosa frase={prova.secoes} />
-        </p>
-      </section>
-
-      <hr className="h-px border-0 bg-border" />
-
-      {/* ── como funciona ─────────────────────────────────────────────── */}
-      <section className="coluna pt-12 pb-12 md:pt-15 md:pb-16">
-        {/* Acompanha o espaçamento de `.titulo-secao`; ver a nota em method.tsx. */}
-        <div className="mb-6.5 flex items-center gap-3 md:mb-8">
-          <span aria-hidden="true" className="text-accent-amber">
-            <GlifoConteudo tamanho={24} />
-          </span>
-          <h2 className="titulo-secao mb-0">{comoFunciona.titulo}</h2>
-        </div>
-        <p className="texto mb-7 md:mb-8">{comoFunciona.chamada}</p>
-
-        <div className="grid gap-4 md:grid-cols-3">
-          {comoFunciona.passos.map((passo) => (
-            <div
-              key={passo.nome}
-              className="superficie-card flex flex-col gap-3 px-4.5 py-4.5 md:px-6.5 md:py-6"
-            >
-              <span className="text-[17px] font-semibold text-foreground">
-                {passo.nome}
-              </span>
-              <p className="texto-mudo">
-                <Prosa frase={passo.texto} />
-              </p>
+            <div className="entra d4 flex flex-wrap gap-3">
+              <a href={`#${exemplo01.ancora}`} className="botao botao-principal">
+                {hero.rejeitar}
+              </a>
+              <Link to="/method" className="botao botao-fantasma">
+                {hero.metodo}
+              </Link>
             </div>
-          ))}
-        </div>
-      </section>
 
-      <hr className="h-px border-0 bg-border" />
+            <p className="rotulo-secao entra d4">{hero.rodape}</p>
+          </div>
 
-      {/* ── os números ────────────────────────────────────────────────── */}
-      <section className="coluna pt-12 pb-12 md:pt-15 md:pb-16">
-        <h2 className="titulo-secao">{numeros.titulo}</h2>
-        <p className="texto-mudo mb-7 md:mb-8.5">{numeros.chamada}</p>
-
-        <div className="flex flex-col gap-4">
-          {numerosMedidos(ficha).map((n) => (
-            <div
-              key={n.comando}
-              className="superficie-card grid items-start gap-4 px-4.5 py-4.5 md:grid-cols-[128px_minmax(0,1fr)] md:gap-7 md:px-6.5 md:py-6"
-            >
-              <span className="numero-medido">{n.valor}</span>
-              {/* `min-w-0`: item de grade não encolhe abaixo do próprio
-                  conteúdo mínimo, e o comando é largo. Sem isto o card empurra
-                  a página inteira e o celular ganha rolagem horizontal — foi o
-                  que o e2e pegou. */}
-              <div className="flex min-w-0 flex-col gap-3">
-                <p className="texto md:text-[16px]">
-                  <Prosa frase={n.texto} />
+          <div className="flex min-w-0 flex-col gap-4">
+            <h2 className="titulo-3">{configurar.titulo}</h2>
+            <p className="texto-mudo">{configurar.texto}</p>
+            <BlocoDeComando
+              agente
+              rotulo={configurar.rotuloDoPrompt}
+              linhas={[configurar.trecho]}
+              copiar={configurar.promptCompleto}
+              medicao={
+                <p className="medicao">
+                  <span>{configurar.origem}</span>
+                  <a href={secaoDoQuickstart(configurar.ancoraDoPrompt)}>{configurar.promptInteiro}</a>
                 </p>
-                <BlocoDeComando compacto>{n.comando}</BlocoDeComando>
-              </div>
-            </div>
-          ))}
+              }
+            />
+            <p className="texto-mudo">{configurar.ouRode}</p>
+            <BlocoDeComando className="imprime" linhas={configurar.comandos} />
+            <p className="medicao">
+              <span>
+                <span aria-hidden="true" className="text-primary">$ </span>
+                {configurar.legendaTerminal}
+              </span>
+              <span>
+                <span aria-hidden="true" className="text-accent-amber">› </span>
+                {configurar.legendaAgente}
+              </span>
+            </p>
+          </div>
         </div>
       </section>
 
-      <hr className="h-px border-0 bg-border" />
+      {/* ── as três partes ─────────────────────────────────────────────── */}
+      <section className="secao">
+        <div className="largura flex flex-col gap-10">
+          <CabecaDeSecao rotulo={comoFunciona.rotulo} titulo={comoFunciona.titulo} chamada={comoFunciona.chamada} />
 
-      {/* ── o começo ──────────────────────────────────────────────────── */}
-      <section className="coluna pt-12 pb-16 md:pt-15 md:pb-21">
-        <h2 className="titulo-secao">{comeco.titulo}</h2>
+          <div className="grade-3">
+            {comoFunciona.partes.map((p) => (
+              <div key={p.quem} className="superficie-card flex flex-col gap-3.5 p-5.5">
+                <p className="rotulo-passo">{p.quem}</p>
+                <h3 className="titulo-3">{p.titulo}</h3>
+                <p className="texto-mudo">
+                  <Prosa frase={p.texto} />
+                </p>
+                <code className={cn("linha-registro", p.comando && "linha-comando")}>
+                  {p.comando && (
+                    <span aria-hidden="true" className="text-primary">
+                      ${" "}
+                    </span>
+                  )}
+                  {p.linha}
+                </code>
+              </div>
+            ))}
+          </div>
 
-        {/* O comando, e o que ele imprime. Depois o `ls`, e o que ele imprime.
-            As duas saídas são capturas do mesmo clone que mede os números acima
-            — o leitor vê o que vai baixar antes de baixar. */}
-        <BlocoDeComando className="mb-3">{comeco.comando}</BlocoDeComando>
-        <BlocoDeSaida
-          saida={ficha.saidaClone}
-          rotulo="Output of git clone"
-          className="mb-6"
-        />
+          <div className="grade-3">
+            {comoFunciona.camadas.map((c) => (
+              <div key={c.texto} className={cn("faixa-camada", c.produto && "faixa-produto")}>
+                <p className={cn("rotulo-secao", c.produto && "text-accent-amber")}>{c.rotulo}</p>
+                <p>{c.texto}</p>
+              </div>
+            ))}
+          </div>
 
-        <BlocoDeComando className="mb-3">{comeco.comandoLs}</BlocoDeComando>
-        <BlocoDeSaida saida={ficha.saidaLs} rotulo="Contents of the package" />
+          <p className="texto-mudo">{comoFunciona.nota}</p>
+        </div>
+      </section>
 
-        <p className="texto-mudo mt-5 mb-7 text-[13.5px] md:text-[14.5px]">
-          {comeco.legenda(ficha)}
-        </p>
+      {/* ── exemplo 01 ─────────────────────────────────────────────────── */}
+      <section id={exemplo01.ancora} className="secao">
+        <div className="largura flex flex-col gap-8">
+          <CabecaDeSecao rotulo={exemplo01.rotulo} titulo={exemplo01.titulo} chamada={exemplo01.chamada} />
 
-        {/* `min-h-6`: o piso de 24px da WCAG 2.2 (2.5.8) para alvo de toque.
-            Um link de linha única tem 21px de altura e ficaria abaixo dele. */}
-        <Link
-          to="/method"
-          className="inline-flex min-h-6 items-center text-[16px] font-medium"
-        >
-          {comeco.metodo}
-        </Link>
+          <div className="exemplo-grade">
+            <ol className="passos-exemplo">
+              <li>
+                <h3 className="titulo-passo">
+                  <span className="rotulo-passo">1</span> {exemplo01.prever.titulo}
+                </h3>
+                <p className="texto-mudo">{exemplo01.prever.texto}</p>
+                <div className="flex flex-wrap gap-2.5">
+                  {exemplo01.prever.opcoes.map((o) => (
+                    <a key={o} href="#saida-01" className="botao botao-escolha">
+                      {o}
+                    </a>
+                  ))}
+                </div>
+              </li>
+              <li>
+                <h3 className="titulo-passo">
+                  <span className="rotulo-passo">2</span> {exemplo01.rodar.titulo}
+                </h3>
+                <BlocoDeComando rotulo={exemplo01.rodar.rotulo} linhas={[comandoDe("negative-test-output")]} />
+              </li>
+              <li>
+                <h3 className="titulo-passo">
+                  <span className="rotulo-passo">3</span> {exemplo01.ler.titulo}
+                </h3>
+                <p className="texto-mudo">{exemplo01.ler.texto}</p>
+              </li>
+            </ol>
+
+            <QuadroDaCaptura
+              className="alvo-ancora"
+              rotulo={`output · ${comandoDe("negative-test-output")}`}
+              direita={<span className="codigo-saida codigo-1">{exemplo01.rotuloSaida}</span>}
+              texto={trechoDaSecao(ficha.captura, exemplo01.secao)}
+              destaques={exemplo01.destaques}
+              rodape={rodapeDaCaptura}
+            />
+          </div>
+          <span id="saida-01" className="sr-only">
+            Output of the run
+          </span>
+
+          <details className="detalhes-exemplo">
+            <summary>{exemplo01.detalhes.resumo}</summary>
+            <div className="flex flex-col gap-6 pt-4">
+              <div className="grade-2">
+                {exemplo01.detalhes.paragrafos.map((p, i) => (
+                  <p key={i} className="texto-mudo">
+                    <Prosa frase={p} />
+                  </p>
+                ))}
+              </div>
+              <p className="rotulo-secao">{exemplo01.detalhes.inteira}</p>
+              <BlocoDeTerminal saida={ficha.captura} />
+            </div>
+          </details>
+        </div>
+      </section>
+
+      {/* ── exemplo 02 ─────────────────────────────────────────────────── */}
+      <section id={exemplo02.ancora} className="secao">
+        <div className="largura flex flex-col gap-8">
+          <CabecaDeSecao rotulo={exemplo02.rotulo} titulo={exemplo02.titulo} chamada={exemplo02.chamada} />
+
+          <div className="exemplo-grade exemplo-grade-invertida">
+            <QuadroDaCaptura
+              rotulo={exemplo02.rotuloSaida}
+              direita={
+                <span className="flex flex-wrap gap-2">
+                  <span className="codigo-saida codigo-0">{exemplo02.codigos.semCitacao}</span>
+                  <span className="codigo-saida codigo-1">{exemplo02.codigos.comCitacao}</span>
+                </span>
+              }
+              texto={trechoDaSecao(ficha.captura, exemplo02.secao)}
+              destaques={exemplo02.destaques}
+              rodape={rodapeDaCaptura}
+            />
+
+            <div className="flex min-w-0 flex-col gap-4">
+              {exemplo02.cartoes.map((c) => (
+                <div key={c.rotulo} className="superficie-card flex flex-col gap-2 p-5">
+                  <p className={cn("rotulo-passo", c.reprova && "text-status-alert")}>{c.rotulo}</p>
+                  <p className="texto">{c.texto}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── os números ─────────────────────────────────────────────────── */}
+      <section id={numeros.ancora} className="secao">
+        <div className="largura flex flex-col gap-9">
+          <CabecaDeSecao rotulo={numeros.rotulo} titulo={numeros.titulo} chamada={numeros.chamada} />
+
+          <div className="grade-3">
+            <CartaoDeNumero
+              valor={ficha.asseracoes}
+              titulo={numeros.asseracoes.titulo}
+              texto={numeros.asseracoes.texto(ficha.asseracoes)}
+              id="negative-test-assertions"
+            />
+            <CartaoDeNumero
+              valor={ficha.arquivos}
+              titulo={numeros.arquivos.titulo}
+              texto={numeros.arquivos.texto}
+              id="package-files"
+            />
+            <CartaoDeNumero
+              valor={ficha.doctor.total}
+              titulo={<Prosa frase={numeros.doctor.titulo(ficha.doctor.passaram, ficha.doctor.na)} />}
+              texto={numeros.doctor.texto}
+              id="doctor-summary"
+            />
+          </div>
+
+          <p>
+            <Link to="/evidence" className="inline-flex min-h-6 items-center">
+              {numeros.todas}
+            </Link>
+          </p>
+        </div>
+      </section>
+
+      {/* ── contra nós mesmos: rascunho no preview, fora da produção ───── */}
+      {blocoAparece(contraNos.conferido, PUBLICACAO) && (
+        <section id={contraNos.ancora} className="secao">
+          <div className="largura flex flex-col gap-9">
+            <CabecaDeSecao rotulo={contraNos.rotulo} titulo={contraNos.titulo} chamada={contraNos.chamada} />
+            <div className="grade-4">
+              {contraNos.passos.map((p) => (
+                <div key={p.texto} className={cn("superficie-card flex flex-col gap-1.5 p-5", p.fechado && "cartao-feito")}>
+                  <span className={cn("numero-medio", p.fechado && "text-primary")}>{p.valor}</span>
+                  <p className="texto">{p.texto}</p>
+                  <p className="rotulo-secao">{p.rodape}</p>
+                </div>
+              ))}
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="texto-mudo max-w-[70ch]">
+                {contraNos.limite} {contraNos.limiteFonte}
+              </p>
+              {!contraNos.conferido && <MarcaRascunho>{contraNos.marca}</MarcaRascunho>}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── o começo ───────────────────────────────────────────────────── */}
+      <section id={comeco.ancora} className="secao">
+        <div className="largura comeco-grade">
+          <div className="flex min-w-0 flex-col gap-3.5">
+            <p className="rotulo-secao">{comeco.rotulo}</p>
+            <h2 className="titulo-2">{comeco.titulo}</h2>
+            <p className="chamada">{comeco.chamada}</p>
+            <p className="texto-mudo">
+              <Prosa frase={comeco.nota} />
+            </p>
+          </div>
+          <div className="flex min-w-0 flex-col gap-3">
+            <BlocoDeComando rotulo={comeco.passo1} linhas={[CLONE, "cd shizune", CHECKOUT_DA_ULTIMA]} />
+            <BlocoDeComando
+              rotulo={comeco.passo2}
+              linhas={[comandoDe("doctor-summary")]}
+              saida={ficha.doctor.linha}
+              rotuloDaSaida={comeco.passo2Saida}
+              medicao={<p className="medicao"><span>{comeco.passo2Saida}</span></p>}
+            />
+            <BlocoDeComando rotulo={comeco.passo3} linhas={[comeco.novoProjeto]} />
+          </div>
+        </div>
+      </section>
+
+      {/* ── para onde seguir ───────────────────────────────────────────── */}
+      <section className="secao">
+        <div className="largura flex flex-col gap-6">
+          <p className="rotulo-secao">{ondeSeguir.rotulo}</p>
+          <div className="grade-4">
+            {ondeSeguir.destinos.map((d) =>
+              d.rota === "github" ? (
+                <a key={d.rota} href={REPOSITORIO} className="cartao-destino">
+                  <span className="cartao-destino-rota">{d.rota}</span>
+                  <span>{d.texto}</span>
+                </a>
+              ) : (
+                <Link key={d.rota} to={d.rota} className="cartao-destino">
+                  <span className="cartao-destino-rota">{d.rota}</span>
+                  <span>{d.texto}</span>
+                </Link>
+              ),
+            )}
+          </div>
+        </div>
       </section>
     </>
+  );
+}
+
+function CartaoDeNumero({
+  valor,
+  titulo,
+  texto,
+  id,
+}: {
+  readonly valor: number;
+  readonly titulo: React.ReactNode;
+  readonly texto: string;
+  readonly id: string;
+}) {
+  const m = medicaoDe(id);
+  return (
+    <div className="superficie-card flex flex-col gap-3.5 p-5.5">
+      <span className="numero-medido">{valor}</span>
+      <h3 className="titulo-cartao">{titulo}</h3>
+      <p className="texto-mudo">{texto}</p>
+      <BlocoDeComando
+        className="mt-auto"
+        compacto
+        linhas={[comandoDe(id)]}
+        medicao={<Medicao estado={estadoDe(id)} data={m.data} sha={m.shaCurto} />}
+      />
+    </div>
   );
 }
 

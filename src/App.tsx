@@ -9,6 +9,8 @@ import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import Home from "@/pages/home";
 import Method from "@/pages/method";
+import Evidence from "@/pages/evidence";
+import Roadmap from "@/pages/roadmap";
 import NaoEncontrado from "@/pages/nao-encontrado";
 
 /**
@@ -16,7 +18,7 @@ import NaoEncontrado from "@/pages/nao-encontrado";
  *
  * Instantâneo, e não "suave": rolagem animada é a primeira coisa que este
  * público reprova, e o portão do `check-motion` a proíbe. Sem isto, quem clica
- * em "Read the method →" no fim da `/` chega à `/method` já na metade dela.
+ * em "Read the method" chega à `/method` já na metade dela.
  */
 function AoTopo() {
   const { pathname } = useLocation();
@@ -53,6 +55,8 @@ function Casca() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/method" element={<Method />} />
+          <Route path="/evidence" element={<Evidence />} />
+          <Route path="/roadmap" element={<Roadmap />} />
           <Route path="*" element={<NaoEncontrado />} />
         </Routes>
       </main>

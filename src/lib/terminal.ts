@@ -86,8 +86,44 @@ export function dividirSaida(saida: string): Divisao {
   };
 }
 
-/** Os papéis que a saída tem, e nada além: só três coisas ganham cor. */
-export type Papel = "normal" | "ok" | "secao";
+/**
+ * Uma seção inteira da captura — do marcador `[seção]` até a linha antes do
+ * próximo marcador. Os exemplos da `/` mostram uma seção cada, e a captura
+ * inteira fica no DOM logo abaixo: mostrar uma seção não é cortar a saída,
+ * desde que nenhuma linha DENTRO da seção suma. Se o marcador não existir, a
+ * função devolve vazio e a página não inventa nada no lugar.
+ */
+export function trechoDaSecao(saida: string, secao: string): string {
+  const linhas = saida.replace(/\r\n/g, "\n").split("\n");
+  const inicio = linhas.findIndex((l) => l.startsWith(secao));
+  if (inicio < 0) return "";
+  let fim = linhas.length;
+  for (let i = inicio + 1; i < linhas.length; i++) {
+    if (/^\[[^\]]+\]/.test(linhas[i]) || MARCA_DO_FIM.test(linhas[i])) {
+      fim = i;
+      break;
+    }
+  }
+  return linhas.slice(inicio, fim).join("\n").replace(/\s+$/, "");
+}
+
+/** Os papéis que a saída tem, e nada além: só quatro coisas ganham cor. */
+export type Papel = "normal" | "ok" | "secao" | "reprova";
+
+/** A palavra que é o validador recusando — o que o teste espera ver. */
+const REPROVA = /\b(reprovou|reprova)\b/;
+
+/** Separa a palavra que reprova do resto do trecho, sem mudar o texto. */
+function comReprova(texto: string): Pedaco[] {
+  const m = texto.match(REPROVA);
+  if (!m || m.index === undefined) return [{ texto, papel: "normal" }];
+  const pedacos: Pedaco[] = [
+    { texto: texto.slice(0, m.index), papel: "normal" },
+    { texto: m[0], papel: "reprova" },
+    ...comReprova(texto.slice(m.index + m[0].length)),
+  ];
+  return pedacos.filter((p) => p.texto !== "");
+}
 
 export interface Pedaco {
   readonly texto: string;
@@ -118,7 +154,7 @@ export function colorir(linha: string): readonly Pedaco[] {
     return [
       { texto: ok[1], papel: "normal" },
       { texto: ok[2], papel: "ok" },
-      { texto: ok[3], papel: "normal" },
+      ...comReprova(ok[3]),
     ];
   }
 

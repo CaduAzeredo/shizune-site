@@ -6,7 +6,22 @@ import { fileURLToPath } from "node:url";
 
 const raiz = path.dirname(fileURLToPath(import.meta.url));
 
+/**
+ * Preview ou produção, decidido aqui e gravado como constante (ver
+ * `src/lib/ambiente.ts`). A Vercel põe `VERCEL_ENV=production` só no deploy de
+ * produção; todo o resto — preview, desenvolvimento, build local — é preview, e
+ * no preview as linhas sem fonte conferida aparecem marcadas como rascunho.
+ * `PUBLICACAO=producao` força a produção num build local.
+ */
+const publicacao =
+  process.env.PUBLICACAO === "producao" || process.env.VERCEL_ENV === "production"
+    ? "producao"
+    : "previa";
+
 export default defineConfig({
+  define: {
+    __PUBLICACAO__: JSON.stringify(publicacao),
+  },
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: { "@": path.resolve(raiz, "./src") },

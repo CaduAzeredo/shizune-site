@@ -215,10 +215,24 @@ async function pedirCom(caminho) {
 
 // ── as expectativas, por rota ───────────────────────────────────────────────
 
-const capturaCompleta = readFileSync(
-  path.join(RAIZ, "src/content/saida-teste-negativo.txt"),
-  "utf8",
-).replace(/\n$/, "");
+/**
+ * A ficha da release — a mesma que as páginas leem. A captura e os números que o
+ * e2e procura no corpo saem DELA, e não de literais escritos aqui: um teste que
+ * repetisse "107" à mão passaria a reprovar a página certa no dia da próxima
+ * release, e alguém "corrigiria" o teste em vez de conferir a página.
+ */
+const FICHA = JSON.parse(readFileSync(path.join(RAIZ, "src/content/ficha-release.json"), "utf8"));
+const afirmacao = (id) => FICHA.evidence.find((e) => e.id === id);
+const capturaCompleta = (afirmacao("negative-test-output")?.capture ?? "").replace(/\n$/, "");
+const SHA_CURTO = FICHA.sha.slice(0, 7);
+
+/**
+ * Preview ou produção, pela mesma regra do `vite.config.ts`. No preview, as
+ * linhas sem fonte conferida aparecem marcadas como rascunho; em produção, não
+ * aparecem. O e2e confere a metade que vale para o build que ele está lendo.
+ */
+const ESPERA_RASCUNHO =
+  !EM_PRODUCAO && process.env.PUBLICACAO !== "producao" && process.env.VERCEL_ENV !== "production";
 
 const ROTAS = [
   {
@@ -227,32 +241,44 @@ const ROTAS = [
     titulo: "Shizune — the machine drafts, you sign, the command verifies",
     canonica: "https://shizune.dev/",
     jsonLd: "SoftwareSourceCode",
+    navAtual: null,
+    captura: true,
     /** Item 45: cada uma destas tem de estar NO CORPO, e não no status. */
     corpo: [
       "The machine drafts.",
       "You sign.",
       "The command verifies.",
       "Who decided — and can you prove it?",
-      "Nobody records what the human decided — and that record is what Shizune is.",
-      "The proof",
-      "test-validate-decisions: tudo passou.",
-      "Numbers you can reproduce",
+      "Set up Shizune",
+      "Three parts. None of them does another one's job.",
+      "The registry says what the human decided.",
+      "What happens when a commit cites DEC-999?",
+      "explicou que o DEC-999 não existe",
+      "Can a draft decision count?",
+      "rascunho REFERENCIADA por commit",
+      "Every number comes with the command that produces it.",
+      `${afirmacao("negative-test-assertions").value}`,
+      `${afirmacao("package-files").value}`,
+      `measured ${afirmacao("negative-test-output").measured_at}`,
+      `sha ${SHA_CURTO}`,
+      `Resultado: OK — ${afirmacao("doctor-summary").value}.`,
+      "Three commands. Nothing installed.",
+      'git checkout "$(git tag --sort=-v:refname | head -1)"',
       "git clone https://github.com/CaduAzeredo/shizune.git",
-      // A seção "Start": o que a pessoa vê ao clonar, e o que ela recebe.
-      // As capturas saem do mesmo clone medido — se sumirem, a seção voltou a
-      // ser um comando solto e o leitor deixou de ver o que vai baixar.
-      "Cloning into 'shizune'",
-      "Resolving deltas: 100%",
-      "cd shizune && ls",
-      "QUICKSTART.md",
-      "one run, not an illustration",
+      "Where next",
+      // A captura inteira fica dentro de um <details> fechado, então a linha
+      // final não está no texto visível; a conferência de DOM abaixo (2.10)
+      // é a que prova que ela está na página, inteira.
+      "How this run was verified, and what the output means",
     ],
+    /** A seção "Against ourselves" é rascunho: números de relatório, a medir de novo. */
+    rascunho: ["The same instrument, pointed inward.", "draft · numbers from the published report, to measure again"],
     /**
-     * "Cadu Azeredo" aparece 3 vezes: o lockup do topo, o lockup do rodapé e a
-     * forma composta do fecho. Contado aqui para que a quarta não entre sem
-     * alguém decidir que ela entra.
+     * "Cadu Azeredo" aparece uma vez: no rodapé, no lugar da assinatura. O topo
+     * deixou de levar o nome na rota das quatro páginas (15/10). Contado aqui
+     * para que uma segunda vez não entre sem alguém decidir que ela entra.
      */
-    marca: 3,
+    marca: 1,
   },
   {
     caminho: "/method",
@@ -260,25 +286,30 @@ const ROTAS = [
     titulo: "The method — Shizune",
     canonica: "https://shizune.dev/method",
     jsonLd: "TechArticle",
+    navAtual: "/method",
+    captura: false,
     corpo: [
       "A thin decision-registry layer on top of git.",
       "The registry",
-      "A number is assigned once and never reassigned.",
-      // As duas metades da correção de 2026-09-09. A primeira era a contradição
-      // ("There are two" seguido de um terceiro estado implícito); a segunda é o
-      // que a desfaz. Ancoradas juntas porque separadas elas voltam a divergir.
-      "There are two:",
-      "Superseding is a rule, not a third state.",
-      "the validator knows only the draft and the rest",
+      "A number is assigned once and never reused.",
       "What fails",
+      "Decision signed by a machine key",
+      "Levels and delegation",
+      "delega N1 approved-dependencies autorizado_por DEC-NNN",
+      "What backs a decision",
+      "Merge as a signature",
+      "off by default",
+      "Why it is off: our own measurement said no",
       "What a signature does and does not show",
-      "it is not evidence of authorship",
-      "Measured in a private instance, 2026-09-16:",
-      // As contribuições — a seção que entrou em 2026-09-16, quando o embargo
-      // dos alvos venceu. Sete âncoras, uma por linha da lista, mais o título e
-      // a data de estado: se a seção sumir, ou perder uma linha, ou alguém
-      // "atualizar" a data sem remedir, isto reprova.
-      "Contributions to third-party repositories",
+      "Who wrote the content.",
+      "Guides",
+      "If a key leaks",
+      "Where the method ran",
+      // As contribuições: as duas contagens e as sete linhas com link. Se a
+      // lista sumir, a página volta a ser contagem sem link — o que a regra de
+      // 16/09 proíbe.
+      "Issues and pull requests opened by CaduAzeredo",
+      "runs against GitHub, not the clone",
       "TeleAI-UAGI/Awesome-Agent-Memory#98",
       "TeleAI-UAGI/Awesome-Agent-Memory#100",
       "mem0ai/mem0#7202",
@@ -286,28 +317,63 @@ const ROTAS = [
       "rohitg00/agentmemory#1313",
       "rohitg00/agentmemory#1314",
       "rohitg00/agentmemory#1315",
-      "State as of 2026-09-16.",
-      "Apache-2.0. Shizune™.",
-      // A seção Origins. As duas do meio são as frases em que a página admite
-      // defeito do próprio projeto — as primeiras a sumir se alguém decidir
-      // encurtar a história, e por isso as que mais precisam de âncora.
-      "Origins",
-      "the decision that started it is the only one with no record",
-      "The record came before the history",
-      "could sign in 36 milliseconds",
-      "a status code was being read instead of the body of the response",
-      "Michael Nygard",
     ],
-    /**
-     * 3, como nas outras rotas: os dois lockups e o fecho do rodapé.
-     *
-     * Era 4 até 2026-09-09. A quarta vinha do texto final da rota, que fechava
-     * com "Shizune — by Cadu Azeredo" logo acima de um rodapé que diz o mesmo.
-     * Foi este contador que tornou a colisão visível; o operador decidiu que a
-     * linha do texto sai e o rodapé único fica. Se voltar a dar 4, alguém
-     * recolocou a assinatura na página.
-     */
-    marca: 3,
+    rascunho: [],
+    marca: 1,
+  },
+  {
+    caminho: "/evidence",
+    status: 200,
+    titulo: "Evidence — Shizune",
+    canonica: "https://shizune.dev/evidence",
+    jsonLd: "TechArticle",
+    navAtual: "/evidence",
+    captura: false,
+    corpo: [
+      "Every claim on this site, the command that checks it in the public repository",
+      "How to read the state",
+      `Read from the release card of the latest release · sha ${SHA_CURTO} · ${FICHA.date}`,
+      "The validator refuses what it must",
+      "A machine key cannot sign a decision",
+      "The doctor does not count n/a as passed",
+      "What you clone",
+      "Contributions opened in public repositories",
+      "What we do not claim",
+      "No gain in time, tokens or cost has been measured, so none is claimed.",
+    ],
+    /** Os treze vizinhos não têm fonte conferida: rascunho no preview, nada em produção. */
+    rascunho: ["Thirteen neighbors. One missing link.", "draft · link to check", "Decision records"],
+    marca: 1,
+  },
+  {
+    caminho: "/roadmap",
+    status: 200,
+    titulo: "Roadmap — Shizune",
+    canonica: "https://shizune.dev/roadmap",
+    jsonLd: "TechArticle",
+    navAtual: "/roadmap",
+    captura: false,
+    corpo: [
+      "Each step closes one threat and publishes one proof.",
+      "The six steps",
+      "Agent signs for the owner",
+      "Poisoned index or memory",
+      "Forged attestation",
+      "Tampered generated rules",
+      "Approval on autopilot",
+      "Long-lived leaked key",
+      "Already done",
+      "A trusted key that is not the owner’s",
+      "The chain: release to sites",
+      "After the steps",
+    ],
+    /** Itens que nomeiam fornecedor de IA: rascunho até a fonte ser conferida (15/10, 13h47). */
+    rascunho: [
+      "Adapters that turn approvals from LangGraph",
+      "Identity through Sigstore OIDC, Entra or SPIFFE",
+      "draft · vendor name, source to check",
+    ],
+    marca: 1,
   },
   {
     caminho: "/nao-existe",
@@ -315,8 +381,11 @@ const ROTAS = [
     titulo: "Not found — Shizune",
     canonica: null,
     jsonLd: null,
-    corpo: ["404", "This page does not exist.", "Two routes exist"],
-    marca: 3,
+    navAtual: null,
+    captura: false,
+    corpo: ["404", "This page does not exist.", "Four pages exist, and this is none of them."],
+    rascunho: [],
+    marca: 1,
   },
 ];
 
@@ -330,10 +399,11 @@ const PROIBIDO = [
   { re: /\bgovernance of agents\b/i, porque: "trava: a categoria é auditable decision governance" },
   { re: /!/, porque: "trava: sem exclamação" },
   {
-    // O número de versão só pode existir logo depois de `git checkout `, que é
-    // o comando de clone. Em qualquer outro lugar da página, é trava violada.
-    re: /(?<!git checkout )\bv\d+\.\d+\.\d+\b/,
-    porque: "trava: número de versão só no comando de clone",
+    // Nenhum número de versão no texto visível — nem no comando de clone, que
+    // passou a resolver a tag sozinho (15/10). A versão vive só no JSON-LD, e
+    // o JSON-LD não é texto visível. Até 15/10 a exceção era `git checkout `.
+    re: /\bv?\d+\.\d+\.\d+\b/,
+    porque: "trava: nenhuma versão no texto visível; a versão só no JSON-LD",
   },
 ];
 
@@ -460,6 +530,31 @@ try {
         );
     }
 
+    // 2.2b A regra de publicação: o que não tem fonte conferida aparece marcado
+    // no preview e NÃO aparece em produção. As duas metades, porque uma regra
+    // que só esconde esconderia também do operador, que lê o preview.
+    for (const trecho of rota.rascunho) {
+      const presente = texto.includes(trecho);
+      if (ESPERA_RASCUNHO && presente) ok(`preview — rascunho visível e marcado: "${recorte(trecho)}"`);
+      else if (!ESPERA_RASCUNHO && !presente) ok(`produção — rascunho fora da página: "${recorte(trecho)}"`);
+      else
+        falha(
+          ESPERA_RASCUNHO
+            ? `o preview não mostra o rascunho: "${recorte(trecho)}"`
+            : `a produção mostra um rascunho: "${recorte(trecho)}"`,
+          "linha sem fonte conferida: marcada no preview, ausente em produção",
+        );
+    }
+
+    // 2.2c a navegação diz onde a pessoa está
+    if (rota.navAtual) {
+      const atual = await pagina.evaluate(
+        () => document.querySelector('header nav a[aria-current="page"]')?.getAttribute("href") ?? null,
+      );
+      if (atual === rota.navAtual) ok(`a navegação marca ${rota.navAtual} como a página atual`);
+      else falha("a navegação não marca a página atual", `aria-current em ${atual}`);
+    }
+
     // 2.3 head por rota
     const cabeca = await pagina.evaluate(() => ({
       titulo: document.title,
@@ -482,7 +577,24 @@ try {
             return "(json inválido)";
           }
         }),
+      versao: [...document.querySelectorAll('script[type="application/ld+json"]')]
+        .map((s) => {
+          try {
+            return JSON.parse(s.textContent).softwareVersion ?? null;
+          } catch {
+            return null;
+          }
+        })
+        .find((v) => v !== null) ?? null,
     }));
+
+    // A versão vive num lugar só: o JSON-LD da `/`, com o valor da ficha.
+    if (rota.jsonLd === "SoftwareSourceCode") {
+      if (cabeca.versao === FICHA.version) ok("JSON-LD softwareVersion = a versão da ficha");
+      else falha("JSON-LD sem a versão da ficha", `softwareVersion = ${cabeca.versao}`);
+    } else if (cabeca.versao !== null) {
+      falha("versão no JSON-LD de uma rota que não é a do produto", String(cabeca.versao));
+    }
 
     if (cabeca.titulo === rota.titulo) ok(`title: ${cabeca.titulo}`);
     else falha("title errado", `veio "${cabeca.titulo}", esperado "${rota.titulo}"`);
@@ -531,6 +643,14 @@ try {
         h1: document.querySelectorAll("h1").length,
         nome: conta(document.body.innerText, "Cadu Azeredo"),
         prompt: conta(document.body.innerText, ">_"),
+        topo: document.querySelector("header .topo-nome")?.textContent ?? null,
+        simbolo: document.querySelectorAll("header svg").length,
+        autoria: (document.querySelector("footer .credito")?.textContent ?? "").replace(/[\s]+/g, " ").trim() === "Shizune by Cadu Azeredo",
+        creditoLink: (() => {
+          const a = document.querySelector("footer .credito a");
+          if (!a) return null;
+          return { href: a.getAttribute("href"), alvo: a.getAttribute("target"), texto: a.textContent, fonte: getComputedStyle(a).fontFamily, estilo: getComputedStyle(a).fontStyle };
+        })(),
       };
     });
 
@@ -549,8 +669,21 @@ try {
         `"Cadu Azeredo" aparece ${marcas.nome}×, esperado ${rota.marca}`,
         "a marca não se repete sem alguém decidir que se repete",
       );
-    if (marcas.prompt === 2) ok("o lockup >_ aparece 2× — topo e rodapé");
-    else falha(`o lockup >_ aparece ${marcas.prompt}×`, "esperado 2: topo e rodapé");
+    // O topo é o símbolo e o nome do produto; o autor assina no rodapé. O lockup
+    // antigo (`>_ Cadu Azeredo / shizune`) saiu na rota das quatro páginas, e a
+    // `assinatura-cadu-v2` entra no rodapé quando o arquivo existir.
+    if (marcas.topo === "shizune" && marcas.simbolo === 1) ok("o topo é o símbolo e o nome do produto");
+    else falha("o topo não é o símbolo e o nome do produto", `nome "${marcas.topo}", ${marcas.simbolo} svg`);
+    if (marcas.prompt === 0) ok("o lockup antigo >_ não aparece");
+    else falha(`o lockup antigo >_ aparece ${marcas.prompt}×`, "ele saiu na rota das quatro páginas (15/10)");
+    if (marcas.autoria) ok("o rodapé assina: Shizune by Cadu Azeredo");
+    else falha("o rodapé não assina", "o crédito é Shizune by Cadu Azeredo (15/10, 12h43)");
+    const cl = marcas.creditoLink;
+    if (cl && cl.href === "https://caduazeredo.com" && cl.alvo === null && cl.texto === "Cadu Azeredo")
+      ok("o nome do autor leva a caduazeredo.com, na mesma aba");
+    else falha("o link do crédito não é o combinado", JSON.stringify(cl));
+    if (cl && /Newsreader/.test(cl.fonte) && cl.estilo === "italic") ok("o nome do autor vem em Newsreader Italic");
+    else falha("o nome do autor não está em Newsreader Italic", JSON.stringify(cl));
 
     // 2.5 travas de conteúdo, no texto renderizado
     for (const t of PROIBIDO) {
@@ -728,13 +861,20 @@ try {
         semFoco.map((p) => `${p.tag} "${p.texto}"`).join(" · "),
       );
 
+    // Para trás é: na mesma linha, voltar para a esquerda; fora dela, subir sem
+    // mudar para uma coluna à direita. Até 15/10 a página tinha uma coluna só, e
+    // qualquer subida era salto para trás. Com o hero, os exemplos e as grades
+    // de cartões em colunas, ir do fim da coluna da esquerda para o topo da
+    // coluna da direita é a ordem de leitura. Subir na MESMA coluna, ou subir
+    // para a esquerda, continua sendo salto para trás.
     const visiveis = percurso.filter((p) => p.area > 4);
     const foraDeOrdem = [];
     for (let i = 1; i < visiveis.length; i++) {
       const a = visiveis[i - 1];
       const b = visiveis[i];
       const mesmaLinha = Math.abs(b.y - a.y) <= 8;
-      if (mesmaLinha ? b.x < a.x - 8 : b.y < a.y - 8)
+      const sobeSemIrParaADireita = b.y < a.y - 8 && !(b.x > a.x + 8);
+      if (mesmaLinha ? b.x < a.x - 8 : sobeSemIrParaADireita)
         foraDeOrdem.push(`${a.tag} "${a.texto}" → ${b.tag} "${b.texto}"`);
     }
     if (foraDeOrdem.length === 0)
@@ -754,7 +894,11 @@ try {
       const depois = await pagina.$eval("details", (d) => d.open);
       if (antes !== depois) ok("<details> abre e fecha por teclado (Enter)");
       else falha("<details> não respondeu ao Enter");
+    }
 
+    // A captura inteira no DOM, na rota que a mostra — mesmo dentro do que está
+    // recolhido. Recolher não é cortar; sumir do DOM seria.
+    if (rota.captura) {
       const noDom = await pagina.evaluate(() =>
         [...document.querySelectorAll(".superficie-term pre")]
           .map((p) => p.textContent)
@@ -854,7 +998,12 @@ try {
     const s = await fetch(`${BASE}/sitemap.xml`);
     const xml = await s.text();
     const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
-    const esperado = ["https://shizune.dev/", "https://shizune.dev/method"];
+    const esperado = [
+      "https://shizune.dev/",
+      "https://shizune.dev/method",
+      "https://shizune.dev/evidence",
+      "https://shizune.dev/roadmap",
+    ];
     if (s.status === 200 && JSON.stringify(locs) === JSON.stringify(esperado))
       ok(`sitemap com as ${locs.length} rotas públicas, e só elas`);
     else

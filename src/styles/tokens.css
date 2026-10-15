@@ -32,6 +32,9 @@
      que este site tem. Sem sombra, sem gradiente, sem vidro. */
   --border-topo: #253032;
   --border-topo-term: #2a3639;
+  /* A borda de quem pede atenção sem pedir cor: a barra do bloco de comando, a
+     faixa "lido da ficha", o cartão tracejado do que fica fora dos degraus. */
+  --border-strong: #2c3b3b;
   --foreground: #edf2ef;
   --muted-foreground: #8a9a92;
 
@@ -46,11 +49,21 @@
   /* ---- o acento do produto ---- */
   --accent-amber: #dec39c;
   --accent-amber-deep: #cfa86e;
+  /* O cartão do produto — "this is Shizune", o degrau em andamento, o nível
+     N2, a coluna "where Shizune connects". É o lugar contado onde o âmbar vira
+     borda; o fundo continua quase-preto, um tom acima. Âmbar como elemento,
+     nunca como atmosfera: o cartão inteiro não é âmbar, só o fio dele. */
+  --accent-amber-line: #6e6150;
+  --surface-produto: #121614;
+  /* O fio do degrau feito. Verde porque "feito" é estado, e estado é o papel
+     do verde nesta paleta. */
+  --primary-line: #24563f;
 
   /* ---- estado semântico ---- */
-  /* Só a linha que reprova e o 404. Nenhuma das duas rotas tem linha que
-     reprova, então na prática hoje ele só aparece no 404 — e continua
-     declarado para que a primeira linha vermelha não invente uma cor. */
+  /* O validador recusando e o 404, e nada além: a palavra "reprovou" dentro
+     da captura, os rótulos "◆ fails" e "◆ does not show", o código de saída
+     1 e o 404. Desde a rota das quatro páginas (15/10) a captura aparece nos
+     exemplos da `/`, e é ali que a recusa ganha cor. */
   --status-alert: #e8776e;
 
   /* ---- tipografia ---- */

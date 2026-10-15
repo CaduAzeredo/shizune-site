@@ -1,273 +1,279 @@
 import useSeo from "@/lib/use-seo";
 import { seoMethod } from "@/content/seo";
-import ficha from "@/content/ficha";
-import { CLONE } from "@/content/home";
+import { comandoDe, estadoDe, medicaoDe } from "@/content/ficha";
 import {
+  assinatura,
   contribuicoes,
-  entrega,
-  exigencia,
-  fronteira,
-  licenca,
+  formato,
+  garantia,
+  guias,
+  merge,
+  niveis,
   oQueE,
   oQueReprova,
-  origens,
-  ressalva,
-  secoes,
-  testeNegativo,
-  type SecaoDeTexto,
+  registro,
 } from "@/content/method";
-import { GlifoConteudo } from "@/components/layout/glifo";
+import { secaoDoQuickstart } from "@/content/repositorio";
+import PaginaComSumario from "@/components/layout/pagina-com-sumario";
 import BlocoDeComando from "@/components/ui/bloco-de-comando";
+import { MarcaNota } from "@/components/ui/marca";
+import Medicao from "@/components/ui/medicao";
 import Prosa from "@/components/ui/prosa";
 import { cn } from "@/lib/utils";
 
 /**
- * A rota `/method`.
+ * A rota `/method` — a tela 11.
  *
- * O método inteiro, denso, e sem índice lateral — decisão do operador: com
- * nove seções curtas, um índice ao lado seria mobília. As seções de mecanismo
- * correm juntas no mesmo ritmo; a ressalva tem o dobro de ar e painel próprio,
- * porque é a seção mais importante e a mais fácil de ler por cima.
+ * Esta é a parte documental do site: o registro do operador para ela é "mais
+ * padrão GitHub, mais padrão chato" (2026-09-03), e isso é elogio. Sem efeito,
+ * sem coreografia; o trabalho de design aqui é deixar o texto denso confortável.
  */
-function Secao({ secao }: { readonly secao: SecaoDeTexto }) {
-  return (
-    <>
-      <section className="coluna py-8.5 md:py-11">
-        <h2 className="titulo-secao">{secao.titulo}</h2>
-        {secao.paragrafos.map((p, i) => (
-          <p key={i} className={i > 0 ? "texto mt-4" : "texto"}>
-            <Prosa frase={p} />
-          </p>
-        ))}
-      </section>
-      <hr className="h-px border-0 bg-border" />
-    </>
-  );
-}
-
-/**
- * A história, no fim da rota — e ela se desenha diferente de propósito.
- *
- * Três decisões, e cada uma tem motivo:
- *
- * 1. **Um `<h2>` para "Origins" e `<h3>` para as oito partes.** Oito `<h2>`
- *    fariam o sumário do documento anunciar dezesseis seções, quando a rota tem
- *    nove e uma história no fim. A hierarquia h1 → h2 → h3 é o que mantém o axe
- *    verde e o leitor de tela com um mapa que corresponde à página.
- * 2. **Sem régua entre as partes.** As seções de mecanismo acima são separadas
- *    por régua porque são independentes e se consultam fora de ordem; a
- *    história se lê de cima a baixo. O ritmo é por espaço, e a ausência da linha
- *    já avisa ao leitor que o registro mudou.
- * 3. **Sem o símbolo âmbar.** Ele aparece em dois lugares contados nesta rota —
- *    o marcador de "How it works" e o painel da ressalva. Um terceiro diluiria a
- *    regra de "lugares contados", que é a que o operador já reprovou duas vezes
- *    por excesso.
- */
-function Origens() {
-  return (
-    <section className="coluna py-8.5 md:py-11">
-      <h2 className="titulo-secao">{origens.titulo}</h2>
-
-      <div className="flex flex-col gap-8 md:gap-10">
-        {origens.partes.map((parte) => (
-          <div
-            key={parte.titulo}
-            className={
-              parte.painel
-                ? "superficie-card px-5 py-6 md:px-9.5 md:pt-8 md:pb-7"
-                : undefined
-            }
-          >
-            <div
-              className={
-                parte.painel
-                  ? "mb-5 flex items-center gap-3 md:mb-6"
-                  : undefined
-              }
-            >
-              {parte.painel && (
-                <span aria-hidden="true" className="shrink-0 text-accent-amber">
-                  <GlifoConteudo tamanho={24} />
-                </span>
-              )}
-              <h3
-                className={cn(
-                  "text-[17px] font-semibold tracking-[-0.01em] text-foreground md:text-[18px]",
-                  !parte.painel && "mb-4 md:mb-5",
-                )}
-              >
-                {parte.titulo}
-              </h3>
-            </div>
-            {parte.paragrafos.map((p, i) => (
-              <p key={i} className={i > 0 ? "texto mt-4" : "texto"}>
-                <Prosa frase={p} />
-              </p>
-            ))}
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
+const SUMARIO = [
+  { ancora: oQueE.ancora, rotulo: "What this is" },
+  { ancora: registro.ancora, rotulo: "The registry" },
+  { ancora: oQueReprova.ancora, rotulo: "What fails" },
+  { ancora: niveis.ancora, rotulo: "Levels and delegation" },
+  { ancora: garantia.ancora, rotulo: "What backs a decision" },
+  { ancora: merge.ancora, rotulo: "Merge as a signature" },
+  { ancora: assinatura.ancora, rotulo: "What a signature shows" },
+  { ancora: guias.ancora, rotulo: "Guides" },
+  { ancora: formato.ancora, rotulo: "The format" },
+  { ancora: contribuicoes.ancora, rotulo: "Where the method ran" },
+];
 
 export function Method() {
   useSeo(seoMethod);
+  const m = medicaoDe("negative-test-output");
 
   return (
-    <>
-      <section className="coluna pt-16 pb-10 md:pt-24 md:pb-13">
-        <h1 className="mb-5 text-[26px] leading-[1.25] font-semibold tracking-[-0.022em] text-foreground md:mb-6 md:text-[34px]">
-          {oQueE.titulo}
-        </h1>
-        <p className="text-[17px] leading-[1.55] text-foreground md:text-[19px]">
-          {oQueE.texto}
-        </p>
-      </section>
-
-      <hr className="h-px border-0 bg-border" />
-
-      {secoes.map((s) => (
-        <Secao key={s.titulo} secao={s} />
-      ))}
-
-      {/* ── o que reprova ─────────────────────────────────────────────── */}
-      <section className="coluna py-8.5 md:py-11">
-        <h2 className="titulo-secao">{oQueReprova.titulo}</h2>
-        <p className="texto">
-          <Prosa frase={oQueReprova.abertura} />
-        </p>
-        <p className="texto mt-4.5">{oQueReprova.chamada}</p>
-
-        {/* Numerada em monoespaçada: são os cinco casos que o validador
-            reprova, e cada um corresponde a asserções do teste negativo. */}
-        <ol className="mt-4.5 flex list-none flex-col gap-3 p-0">
-          {oQueReprova.casos.map((caso, i) => (
-            <li
-              key={caso}
-              className="grid grid-cols-[22px_minmax(0,1fr)] gap-3 text-[16px] leading-[1.55] text-foreground md:text-[16.5px]"
-            >
-              <span
-                aria-hidden="true"
-                className="font-mono text-[13px] leading-[1.9] text-muted-foreground"
-              >
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <span>{caso}</span>
-            </li>
+    <PaginaComSumario sumario={SUMARIO}>
+      <section id={oQueE.ancora} className="bloco-leitura">
+        <p className="rotulo-secao">{oQueE.rotulo}</p>
+        <h1 className="titulo-1">{oQueE.titulo}</h1>
+        <p className="chamada-grande">{oQueE.texto}</p>
+        <div className="grade-3">
+          {oQueE.papeis.map((p, i) => (
+            <div key={p.quem} className={cn("superficie-card flex flex-col gap-1.5 px-4.5 py-4", i === 2 && "cartao-forte")}>
+              <p className="rotulo-secao">{p.quem}</p>
+              <p className="texto">
+                <b className="font-semibold">{p.verbo}</b>
+                {p.resto}
+              </p>
+            </div>
           ))}
-        </ol>
-
-        <p className="texto mt-5.5">{oQueReprova.fecho}</p>
-      </section>
-
-      <hr className="h-px border-0 bg-border" />
-
-      <Secao secao={fronteira} />
-      <Secao secao={exigencia} />
-
-      {/* ── a ressalva ────────────────────────────────────────────────── */}
-      <section className="coluna py-15 md:py-20">
-        <div className="superficie-card px-5 py-6 md:px-9.5 md:pt-9.5 md:pb-8.5">
-          {/* O `mb-0` no h2 passa a régua do título para este contêiner, que
-              precisa acompanhar o espaçamento novo de `.titulo-secao` — senão
-              os dois títulos que andam com o símbolo ficam mais apertados que
-              todos os outros. */}
-          <div className="mb-6.5 flex items-center gap-3 md:mb-8">
-            <span aria-hidden="true" className="shrink-0 text-accent-amber">
-              <GlifoConteudo tamanho={24} />
-            </span>
-            <h2 className="titulo-secao mb-0">{ressalva.titulo}</h2>
-          </div>
-
-          {ressalva.paragrafos.map((p, i) => (
-            <p
-              key={p}
-              className={
-                i > 0
-                  ? "mt-4 text-[16.5px] leading-[1.6] text-foreground md:text-[17.5px]"
-                  : "text-[16.5px] leading-[1.6] text-foreground md:text-[17.5px]"
-              }
-            >
-              {p}
-            </p>
-          ))}
-
-          <p className="texto-mudo mt-5">{ressalva.adjacente}</p>
-          <p className="texto-mudo mt-5">
-            <Prosa frase={ressalva.instancia} />
-          </p>
         </div>
       </section>
 
-      <hr className="h-px border-0 bg-border" />
-
-      {/* ── o teste negativo ──────────────────────────────────────────── */}
-      <section className="coluna py-8.5 md:py-11">
-        <h2 className="titulo-secao">{testeNegativo.titulo}</h2>
-        <p className="texto mb-5.5">{testeNegativo.texto}</p>
-        <BlocoDeComando>
-          {`${CLONE}\ncd shizune && git checkout ${ficha.tag}\nnode scripts/test-validate-decisions.mjs`}
-        </BlocoDeComando>
+      <section id={registro.ancora} className="bloco-leitura">
+        <h2 className="titulo-2">{registro.titulo}</h2>
+        <p className="chamada">{registro.chamada}</p>
+        <div className="grade-2">
+          {[registro.rascunho, registro.vigente].map((r) => (
+            <div key={r.rotulo} className="flex min-w-0 flex-col gap-2">
+              <p className="rotulo-secao">{r.rotulo}</p>
+              <code className="linha-registro">{r.linha}</code>
+            </div>
+          ))}
+        </div>
+        <p className="texto-mudo">{registro.nota}</p>
       </section>
 
-      <hr className="h-px border-0 bg-border" />
-
-      {/* ── o que o método entrega ────────────────────────────────────── */}
-      <section className="coluna py-8.5 md:py-11">
-        <h2 className="titulo-secao">{entrega.titulo}</h2>
-        <p className="texto">{entrega.texto}</p>
-        <p className="texto-mudo mt-5">
-          <Prosa frase={entrega.instancia} />
-        </p>
+      <section id={oQueReprova.ancora} className="bloco-leitura">
+        <h2 className="titulo-2">{oQueReprova.titulo}</h2>
+        <p className="chamada">{oQueReprova.chamada}</p>
+        <div className="grade-reprova">
+          {oQueReprova.casos.map((c) => (
+            <div key={c.titulo} className="superficie-card flex min-w-0 flex-col gap-1.5 px-4 py-3.5">
+              <span className="rotulo-passo text-status-alert">{oQueReprova.marca}</span>
+              <b className="font-semibold">{c.titulo}</b>
+              <p className="texto-mudo">{c.texto}</p>
+            </div>
+          ))}
+        </div>
+        <BlocoDeComando
+          rotulo={oQueReprova.rotuloDoComando}
+          linhas={[comandoDe("negative-test-output")]}
+          medicao={<Medicao estado={estadoDe("negative-test-output")} data={m.data} sha={m.shaCurto} />}
+        />
       </section>
 
-      <hr className="h-px border-0 bg-border" />
+      <section id={niveis.ancora} className="bloco-leitura">
+        <h2 className="titulo-2">{niveis.titulo}</h2>
+        <p className="chamada">{niveis.chamada}</p>
+        <div className="grade-3">
+          {niveis.lista.map((n) => (
+            <div key={n.nivel} className={cn("superficie-card flex min-w-0 flex-col gap-2.5 p-4.5", n.humano && "cartao-produto")}>
+              <span className="numero-nivel">{n.nivel}</span>
+              <b className="font-semibold">{n.nome}</b>
+              <dl className="lista-definicao">
+                <dt>{niveis.rotulos.exemplo}</dt>
+                <dd>{n.exemplo}</dd>
+                <dt>{niveis.rotulos.quem}</dt>
+                <dd>{n.quem}</dd>
+                <dt>{niveis.rotulos.rastro}</dt>
+                <dd>{n.rastro}</dd>
+              </dl>
+            </div>
+          ))}
+        </div>
+        <div className="grade-2">
+          <div className="flex min-w-0 flex-col gap-2">
+            <p className="rotulo-secao">{niveis.arquivo.rotulo}</p>
+            <code className="linha-registro">{niveis.arquivo.linha}</code>
+          </div>
+          <div className="flex min-w-0 flex-col gap-2">
+            <p className="rotulo-secao">{niveis.commit.rotulo}</p>
+            <code className="linha-registro whitespace-pre">{niveis.commit.linha}</code>
+          </div>
+        </div>
+        <p className="texto-mudo">{niveis.nota}</p>
+      </section>
 
-      {/* ── as contribuições ──────────────────────────────────────────────
-          A única seção da rota com comando ao lado de números que não saem do
-          clone: estes saem do GitHub, e qualquer pessoa reproduz. Sem contagem
-          de achados, por decisão do operador de 2026-09-16 — ver o comentário
-          do bloco em `content/method.ts`. */}
-      <section className="coluna py-8.5 md:py-11">
-        <h2 className="titulo-secao">{contribuicoes.titulo}</h2>
-        <p className="texto">{contribuicoes.texto}</p>
-        <ul className="mt-5 list-none p-0">
-          {contribuicoes.itens.map((c) => (
-            <li key={c.url} className="texto py-1">
-              <a href={c.url} className="font-mono text-[14px]">
+      <section id={garantia.ancora} className="bloco-leitura">
+        <h2 className="titulo-2">{garantia.titulo}</h2>
+        <p className="chamada">{garantia.chamada}</p>
+        <div className="grade-3">
+          {garantia.tipos.map((t) => (
+            <div key={t.nome} className="superficie-card flex min-w-0 flex-col gap-2 p-4.5">
+              <code className="token-literal self-start">{t.nome}</code>
+              <p className="texto-mudo">{t.texto}</p>
+            </div>
+          ))}
+        </div>
+        <BlocoDeComando rotulo={garantia.rotuloDoComando} linhas={[garantia.comando]} saida={garantia.saida} rotuloDaSaida="Output, one line per decision" />
+      </section>
+
+      <section id={merge.ancora} className="bloco-leitura caixa-tracejada">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="titulo-2">{merge.titulo}</h2>
+          <span className="pilula-desligada">
+            <i aria-hidden="true" />
+            {merge.desligado}
+          </span>
+        </div>
+        <p className="chamada">{merge.chamada}</p>
+        <div className="tabela-rolavel" tabIndex={0} role="group" aria-label={merge.cabecas[0]}>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">{merge.cabecas[0]}</th>
+                <th scope="col">{merge.cabecas[1]}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {merge.condicoes.map((c) => (
+                <tr key={c.porque}>
+                  <td>
+                    <Prosa frase={c.se} />
+                  </td>
+                  <td>{c.porque}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="flex flex-col gap-3">
+          <h3 className="titulo-3">{merge.porQueDesligado.titulo}</h3>
+          <p className="texto-mudo max-w-[66ch]">{merge.porQueDesligado.texto}</p>
+          <BlocoDeComando
+            rotulo={merge.porQueDesligado.rotuloDoComando}
+            linhas={merge.porQueDesligado.comandos}
+            medicao={
+              <p className="medicao">
+                <span className="text-status-alert">{merge.porQueDesligado.resultado}</span>
+                <span>{merge.porQueDesligado.consequencia}</span>
+              </p>
+            }
+          />
+          <p className="texto-mudo">{merge.plano}</p>
+        </div>
+      </section>
+
+      <section id={assinatura.ancora} className="bloco-leitura">
+        <h2 className="titulo-2">{assinatura.titulo}</h2>
+        <div className="grade-2">
+          <div className="superficie-card flex flex-col gap-2 p-5">
+            <p className="rotulo-secao text-primary">{assinatura.mostra.rotulo}</p>
+            <p className="texto">{assinatura.mostra.texto}</p>
+          </div>
+          <div className="superficie-card flex flex-col gap-2 p-5">
+            <p className="rotulo-secao text-status-alert">{assinatura.naoMostra.rotulo}</p>
+            <p className="texto">{assinatura.naoMostra.texto}</p>
+          </div>
+        </div>
+      </section>
+
+      <section id={guias.ancora} className="bloco-leitura">
+        <h2 className="titulo-2">{guias.titulo}</h2>
+        <p className="chamada">{guias.chamada}</p>
+        <div className="grade-guias">
+          {guias.lista.map((g) => (
+            <a key={g.ancora} href={secaoDoQuickstart(g.ancora)} className="cartao-guia">
+              <b className="font-semibold">{g.titulo}</b>
+              <span className="rotulo-secao">{g.secao}</span>
+            </a>
+          ))}
+        </div>
+        <details className="superficie-card detalhes-cartao">
+          <summary>{guias.chaveVazada.resumo}</summary>
+          <ol className="passos-seis">
+            {guias.chaveVazada.passos.map((p) => (
+              <li key={p}>{p}</li>
+            ))}
+          </ol>
+        </details>
+      </section>
+
+      <section id={formato.ancora} className="bloco-leitura">
+        <h2 className="titulo-2">{formato.titulo}</h2>
+        <div className="caixa-tracejada flex flex-col gap-2 p-5">
+          <MarcaNota className="self-start">{formato.marca}</MarcaNota>
+          <p className="texto-mudo">{formato.texto}</p>
+        </div>
+      </section>
+
+      <section id={contribuicoes.ancora} className="bloco-leitura">
+        <h2 className="titulo-2">{contribuicoes.titulo}</h2>
+        <p className="chamada">{contribuicoes.chamada}</p>
+        <div className="grade-2">
+          {[contribuicoes.abertas, contribuicoes.aceitas].map((c) => (
+            <div key={c.comando} className="superficie-card flex min-w-0 flex-col gap-2.5 p-4.5">
+              <span className="numero-medio">{c.valor}</span>
+              <p className="texto">
+                <Prosa frase={c.texto} />
+              </p>
+              <BlocoDeComando
+                compacto
+                rotulo={contribuicoes.rotuloDoComando}
+                linhas={[c.comando]}
+                medicao={
+                  <p className="medicao">
+                    <span>measured {contribuicoes.medidoEm}</span>
+                    <span>runs against GitHub, not the clone</span>
+                  </p>
+                }
+              />
+            </div>
+          ))}
+        </div>
+        <p className="texto-mudo max-w-[70ch]">{contribuicoes.nota}</p>
+
+        <h3 className="titulo-3">{contribuicoes.lista.titulo}</h3>
+        <ul className="lista-contribuicoes">
+          {contribuicoes.lista.itens.map((c) => (
+            <li key={c.url}>
+              <a href={c.url} className="font-mono">
                 {c.repo}#{c.numero}
-              </a>{" "}
-              — {c.tipo}, {c.estado}
+              </a>
+              <span className="texto-mudo">
+                {c.tipo} · {c.estado}
+              </span>
             </li>
           ))}
         </ul>
-        <p className="texto-mudo mt-3 mb-4">{contribuicoes.medidoEm}</p>
-        <BlocoDeComando>{contribuicoes.comando}</BlocoDeComando>
+        <p className="texto-mudo">{contribuicoes.lista.estadoEm}</p>
       </section>
-
-      <hr className="h-px border-0 bg-border" />
-
-      {/* ── a história ────────────────────────────────────────────────────
-          Última seção de CONTEÚDO, antes do fecho administrativo. "License and
-          name" fica por último porque não é conteúdo: é `Apache-2.0`,
-          `Shizune™` e a política de nome, e se lê colado ao rodapé, que diz as
-          mesmas três coisas. Pôr a história entre os dois separaria duas peças
-          que funcionam juntas. */}
-      <Origens />
-
-      <hr className="h-px border-0 bg-border" />
-
-      {/* ── licença e nome ────────────────────────────────────────────── */}
-      <section className="coluna pt-9.5 pb-15 md:pt-12 md:pb-19">
-        <h2 className="titulo-secao">{licenca.titulo}</h2>
-        {/* Sem assinatura própria aqui — ver a nota em `content/method.ts`.
-            Quem assina a página é o rodapé global, e ele é um só. */}
-        <p className="texto">
-          <Prosa frase={licenca.texto} />
-        </p>
-      </section>
-    </>
+    </PaginaComSumario>
   );
 }
 
