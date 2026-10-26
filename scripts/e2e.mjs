@@ -815,6 +815,18 @@ try {
           impacto: v.impact,
           n: v.nodes.length,
           alvo: v.nodes[0]?.target?.join(" ") ?? "",
+          // O que o axe mediu no nó, e não só onde: sem isso, uma falha que só
+          // acontece no navegador do CI não diz se é a cor, o fundo ou o tamanho.
+          medido: (v.nodes[0]?.any ?? [])
+            .map((c) => c.data)
+            .filter((d) => d && typeof d === "object")
+            .map((d) =>
+              ["fgColor", "bgColor", "contrastRatio", "expectedContrastRatio", "fontSize", "fontWeight", "messageKey"]
+                .filter((k) => d[k] !== undefined)
+                .map((k) => `${k}=${d[k]}`)
+                .join(" "),
+            )
+            .join(" | "),
         })),
         passou: r.passes.length,
       };
@@ -823,7 +835,7 @@ try {
       ok(`axe WCAG 2A+AA — 0 violações, ${resultado.passou} regras passaram`);
     else
       for (const v of resultado.violacoes)
-        falha(`axe: ${v.id} (${v.impacto}, ${v.n} nó(s))`, v.alvo);
+        falha(`axe: ${v.id} (${v.impacto}, ${v.n} nó(s))`, v.medido ? `${v.alvo} — ${v.medido}` : v.alvo);
 
     // 2.9 foco visível e ordem de tabulação
     await pagina.evaluate(() => window.scrollTo(0, 0));
