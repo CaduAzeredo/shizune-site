@@ -801,6 +801,23 @@ try {
     // uma violação de verdade que dissesse a mesma coisa.
     const marcaAxe = erros.length;
     await pagina.setViewportSize({ width: 1440, height: 900 });
+    // O axe mede o estado em que a página fica, não um quadro da entrada. A
+    // cascata da dobra (`surgir`) passa pela opacidade, e no Chrome do CI ela
+    // ainda não tinha terminado quando o axe rodou: em 25/10 o botão principal
+    // saiu com fundo #2b8260 (o #2e8c67 a 0,92 de opacidade sobre o fundo) e
+    // contraste 4,12, contra 4,67 no estado final. Espera-se a entrada acabar;
+    // a que não acabar em 3 s é levada ao fim, que é o estado que o `backwards`
+    // garante, e a contagem sai na linha do axe.
+    const forcadas = await pagina.evaluate(async () => {
+      const vivas = () => document.getAnimations().filter((a) => a.playState === "running");
+      await Promise.race([
+        Promise.all(vivas().map((a) => a.finished.catch(() => {}))),
+        new Promise((r) => setTimeout(r, 3000)),
+      ]);
+      const restantes = vivas();
+      for (const a of restantes) a.finish();
+      return restantes.length;
+    });
     await pagina.evaluate(axeFonte);
     const resultado = await pagina.evaluate(async () => {
       const r = await axe.run(document, {
@@ -815,15 +832,30 @@ try {
           impacto: v.impact,
           n: v.nodes.length,
           alvo: v.nodes[0]?.target?.join(" ") ?? "",
+          // O que o axe mediu no nó, e não só onde: sem isso, uma falha que só
+          // acontece no navegador do CI não diz se é a cor, o fundo ou o tamanho.
+          medido: (v.nodes[0]?.any ?? [])
+            .map((c) => c.data)
+            .filter((d) => d && typeof d === "object")
+            .map((d) =>
+              ["fgColor", "bgColor", "contrastRatio", "expectedContrastRatio", "fontSize", "fontWeight", "messageKey"]
+                .filter((k) => d[k] !== undefined)
+                .map((k) => `${k}=${d[k]}`)
+                .join(" "),
+            )
+            .join(" | "),
         })),
         passou: r.passes.length,
       };
     });
     if (resultado.violacoes.length === 0)
-      ok(`axe WCAG 2A+AA — 0 violações, ${resultado.passou} regras passaram`);
+      ok(
+        `axe WCAG 2A+AA — 0 violações, ${resultado.passou} regras passaram` +
+          (forcadas ? ` (${forcadas} animação(ões) de entrada levadas ao fim depois de 3 s)` : ""),
+      );
     else
       for (const v of resultado.violacoes)
-        falha(`axe: ${v.id} (${v.impacto}, ${v.n} nó(s))`, v.alvo);
+        falha(`axe: ${v.id} (${v.impacto}, ${v.n} nó(s))`, v.medido ? `${v.alvo} — ${v.medido}` : v.alvo);
 
     // 2.9 foco visível e ordem de tabulação
     await pagina.evaluate(() => window.scrollTo(0, 0));
